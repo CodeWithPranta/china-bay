@@ -4,7 +4,7 @@
 @source '../../storage/framework/views/*.php';
 
 @theme {
-    --font-sans: 'Inter', 'Hind Siliguri', ui-sans-serif, system-ui, sans-serif;
+    --font-sans: 'Inter', 'Hind Siliguri', 'Noto Naskh Arabic', ui-sans-serif, system-ui, sans-serif;
     --color-brand: #c8102e;
     --color-brand-dark: #a50d25;
     --color-ink: #1b2233;
@@ -52,4 +52,18 @@
 
 [x-cloak] {
     display: none !important;
+}
+
+/* RTL: rely on logical properties + dir="rtl" for automatic mirroring.
+   Keep hero dots centered and slider swipe direction-agnostic. */
+[dir='rtl'] {
+    text-align: start;
+}
+
+[dir='rtl'] .slide {
+    direction: rtl;
+}
+
+[dir='rtl'] input[type='search'] {
+    text-align: start;
 }

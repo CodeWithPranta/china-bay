@@ -9,7 +9,7 @@
 @endphp
 
 @section('content')
-{{-- Hero slider --}}
+{{-- Hero slider (auto-rotate + dots + swipe; no prev/next arrows) --}}
 <section id="hero" aria-roledescription="carousel" aria-label="Promotions" class="relative mt-3 overflow-hidden rounded-lg bg-slate-50">
     <div id="slides" class="relative min-h-[26rem] md:min-h-[22rem]">
         @foreach ($slides as $i => $s)
@@ -28,9 +28,7 @@
             </div>
         @endforeach
     </div>
-    <button id="prevSlide" class="absolute left-2 top-1/2 hidden size-8 -translate-y-1/2 place-items-center rounded-full bg-white/80 shadow hover:bg-white sm:grid" aria-label="Previous slide">‹</button>
-    <button id="nextSlide" class="absolute right-2 top-1/2 hidden size-8 -translate-y-1/2 place-items-center rounded-full bg-white/80 shadow hover:bg-white sm:grid" aria-label="Next slide">›</button>
-    <div id="dots" class="absolute bottom-3 left-1/2 flex -translate-x-1/2 gap-1.5">
+    <div id="dots" class="absolute inset-x-0 bottom-3 flex justify-center gap-1.5">
         @foreach ($slides as $i => $s)
             <button data-dot="{{ $i }}" class="size-2 rounded-full {{ $i === 0 ? 'bg-white' : 'bg-white/50' }}" aria-label="Go to slide {{ $i + 1 }}"></button>
         @endforeach
@@ -116,7 +114,7 @@
 <script>
 window.CB_PRODUCTS = @json(collect($products)->mapWithKeys(fn($p) => [$p['id'] => $p]));
 (function () {
-    // Slider: auto-rotate 5s + dots + prev/next + swipe
+    // Slider: auto-rotate 5s + dots + swipe (arrows removed by design)
     const slides = [...document.querySelectorAll('#slides .slide')];
     const dots = [...document.querySelectorAll('#dots [data-dot]')];
     let cur = 0, timer;
@@ -127,8 +125,6 @@ window.CB_PRODUCTS = @json(collect($products)->mapWithKeys(fn($p) => [$p['id'] =
         restart();
     }
     function restart() { clearInterval(timer); timer = setInterval(() => go(cur + 1), 5000); }
-    document.getElementById('prevSlide')?.addEventListener('click', () => go(cur - 1));
-    document.getElementById('nextSlide')?.addEventListener('click', () => go(cur + 1));
     dots.forEach((d) => d.addEventListener('click', () => go(+d.dataset.dot)));
     let sx = 0;
     const hero = document.getElementById('slides');
@@ -146,8 +142,8 @@ window.CB_PRODUCTS = @json(collect($products)->mapWithKeys(fn($p) => [$p['id'] =
     const empty = document.getElementById('empty');
     const params = new URLSearchParams(location.search);
     const card = (p) => `<article class="relative flex flex-col rounded-lg border border-slate-100 p-3 shadow-sm transition hover:shadow-md">
-        <span class="badge-off absolute left-2 top-2">-${p.off}%</span>
-        <button data-wish="${p.id}" aria-label="Toggle wishlist" class="absolute right-2 top-1.5 text-xl text-slate-300 hover:text-brand">♡</button>
+        <span class="badge-off absolute start-2 top-2">-${p.off}%</span>
+        <button data-wish="${p.id}" aria-label="Toggle wishlist" class="absolute end-2 top-1.5 text-xl text-slate-300 hover:text-brand">♡</button>
         <a href="/product/${p.slug}" class="grid h-28 place-items-center text-6xl">${p.emoji}</a>
         <h3 class="mt-2 text-[11px] font-semibold leading-snug"><a href="/product/${p.slug}" class="hover:text-brand">${p.name}<br><span class="font-normal text-slate-500">${p.sub}</span></a></h3>
         <p class="mt-1 text-[10px] text-slate-400"><s>৳ ${Number(p.old).toLocaleString()}</s> <b class="text-sm text-brand">৳ ${Number(p.price).toLocaleString()}</b></p>

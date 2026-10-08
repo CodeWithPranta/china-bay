@@ -13,7 +13,7 @@
 @endphp
 <aside x-show="sidebar" x-transition class="z-30 w-60 shrink-0 border-r border-slate-200 bg-navy text-white max-lg:fixed max-lg:inset-y-0 max-lg:left-0" aria-label="Admin menu">
     <div class="p-5">
-        <a href="/admin" class="text-2xl font-extrabold text-white">ChinaBay <span class="rounded bg-brand px-1.5 py-0.5 align-middle text-[10px]">ADMIN</span></a>
+        <a href="/admin" class="flex items-center gap-2" aria-label="ChinaBay admin"><x-shop.logo class="h-9 w-auto" /><span class="rounded bg-brand px-1.5 py-0.5 align-middle text-[10px] font-bold text-white">ADMIN</span></a>
         <p class="mt-1 text-[11px] text-slate-400">Sales · Stock · Orders</p>
     </div>
     <nav class="space-y-1 px-3 pb-6 text-sm">

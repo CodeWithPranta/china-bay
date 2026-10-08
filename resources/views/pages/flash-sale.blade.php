@@ -31,13 +31,25 @@
     <div class="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
         @foreach ($products as $i => $p)
             @php $sold = [82, 65, 74, 58, 45, 90][$i % 6]; @endphp
-            <div class="relative">
-                <x-shop.product-card :product="$p" />
-                <div class="absolute inset-x-3 bottom-[52px]">
-                    <div class="h-1.5 overflow-hidden rounded-full bg-slate-100"><div class="h-full rounded-full bg-gradient-to-r from-brand to-amber-500" style="width: {{ $sold }}%"></div></div>
-                    <p class="mt-0.5 text-[10px] font-semibold text-brand">{{ $sold }}% sold · {{ $p['stock'] }} left!</p>
+            <article class="flex flex-col rounded-lg border border-slate-100 p-3 shadow-sm transition hover:shadow-md">
+                <div class="relative">
+                    <span class="badge-off absolute start-0 top-0">-{{ $p['off'] }}%</span>
+                    <button data-wish="{{ $p['id'] }}" aria-label="Toggle wishlist" class="absolute end-0 top-0 text-xl text-slate-300 transition hover:scale-110 hover:text-brand">♡</button>
+                    <a href="/product/{{ $p['slug'] }}" class="grid h-28 place-items-center text-6xl" aria-label="{{ $p['name'] }}">{{ $p['emoji'] }}</a>
                 </div>
-            </div>
+                <h3 class="mt-2 min-h-8 text-[11px] font-semibold leading-snug">
+                    <a href="/product/{{ $p['slug'] }}" class="hover:text-brand">{{ $p['name'] }}<br><span class="font-normal text-slate-500">{{ $p['sub'] }}</span></a>
+                </h3>
+                <p class="mt-1 text-[10px] text-slate-400"><s>৳ {{ number_format($p['old']) }}</s> <b class="text-sm text-brand">৳ {{ number_format($p['price']) }}</b></p>
+                <p class="text-[10px] text-amber-400">★★★★★ <span class="text-slate-400">({{ $p['reviews'] }})</span></p>
+                <div class="mt-2">
+                    <div class="h-1.5 overflow-hidden rounded-full bg-slate-100" role="progressbar" aria-valuenow="{{ $sold }}" aria-valuemin="0" aria-valuemax="100" aria-label="{{ $sold }}% sold"><div class="h-full rounded-full bg-gradient-to-r from-brand to-amber-500" style="width: {{ $sold }}%"></div></div>
+                    <p class="mt-1 text-[10px] font-semibold text-brand">{{ $sold }}% sold · {{ $p['stock'] }} left!</p>
+                </div>
+                <div class="mt-auto pt-2">
+                    <button data-add="{{ $p['id'] }}" class="btn w-full py-1.5 text-[11px]">🛒 Add to Cart</button>
+                </div>
+            </article>
         @endforeach
     </div>
 </section>

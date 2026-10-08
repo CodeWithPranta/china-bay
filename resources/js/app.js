@@ -168,6 +168,89 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
+// Voice typing (Web Speech API) for manual search + AI assistant inputs.
+// Dictation language follows <html lang>: bn -> bn-BD, ar -> ar-SA.
+const SpeechAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
+let voiceRec = null;
+let voiceBtn = null;
+
+function voiceLang() {
+    const l = (document.documentElement.lang || 'en').toLowerCase();
+    if (l.startsWith('bn')) {
+        return 'bn-BD';
+    }
+    if (l.startsWith('ar')) {
+        return 'ar-SA';
+    }
+    return 'en-US';
+}
+
+function stopVoice() {
+    try {
+        voiceRec?.stop();
+    } catch {
+        /* already stopped */
+    }
+    voiceRec = null;
+    voiceBtn?.classList.remove('bg-brand', 'text-white', 'animate-pulse');
+    voiceBtn = null;
+}
+
+function startVoice(btn) {
+    const input = btn.closest('form')?.querySelector('input[type="search"], input[type="text"]');
+    if (!input) {
+        return;
+    }
+    if (!SpeechAPI) {
+        toast('Voice search is not supported in this browser');
+        return;
+    }
+    if (voiceRec) {
+        stopVoice();
+        return;
+    }
+    const rec = new SpeechAPI();
+    rec.lang = voiceLang();
+    rec.interimResults = true;
+    rec.maxAlternatives = 1;
+    voiceRec = rec;
+    voiceBtn = btn;
+    btn.classList.add('bg-brand', 'text-white', 'animate-pulse');
+    input.focus();
+    rec.onresult = (e) => {
+        let text = '';
+        for (const r of e.results) {
+            text += r[0].transcript;
+        }
+        input.value = text;
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+    };
+    rec.onend = () => stopVoice();
+    rec.onerror = (e) => {
+        stopVoice();
+        if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
+            toast('Microphone blocked — allow access and try again');
+        }
+    };
+    try {
+        rec.start();
+    } catch {
+        stopVoice();
+    }
+}
+
+document.addEventListener('click', (e) => {
+    const b = e.target.closest('[data-voice]');
+    if (b) {
+        e.preventDefault();
+        startVoice(b);
+    }
+});
+
+if (!SpeechAPI) {
+    document.querySelectorAll('[data-voice]').forEach((b) => b.classList.add('hidden'));
+}
+
 // Expose for page-level scripts (home slider, product gallery, checkout calc).
 window.cbHelpers = { $, $$, tk, toast, panel, closeAll, openDrawer, bump };
 window.addEventListener('DOMContentLoaded', () => window.ChinaBay.sync());

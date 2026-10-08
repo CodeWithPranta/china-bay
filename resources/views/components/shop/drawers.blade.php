@@ -6,7 +6,7 @@
 
 <aside id="menu" class="fixed inset-y-0 left-0 z-50 w-72 -translate-x-full overflow-y-auto bg-white p-5 transition-transform duration-300" aria-label="Menu" inert>
     <div class="flex items-center justify-between">
-        <b class="text-2xl font-extrabold text-brand">ChinaBay</b>
+        <a href="/" aria-label="ChinaBay home"><x-shop.logo class="h-9 w-auto" /></a>
         <button data-act="close" class="grid size-9 place-items-center rounded-full bg-slate-100 hover:bg-brand hover:text-white" aria-label="Close">
             <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg>
         </button>
@@ -22,9 +22,21 @@
     <h3 class="mb-2 mt-6 text-xs font-semibold text-slate-500">Categories</h3>
     <ul class="text-sm">
         @foreach ($cats as $c)
-            <li><a href="/shop?cat={{ $c['slug'] }}" class="flex w-full items-center gap-3 py-2.5 text-left">{{ $c['emoji'] }} {{ $c['en'] }}</a></li>
+            <li><a href="/shop?cat={{ $c['slug'] }}" class="flex w-full items-center gap-3 py-2.5 text-start">{{ $c['emoji'] }} {{ $c['en'] }}</a></li>
         @endforeach
     </ul>
+    <div class="mt-6 border-t border-slate-100 pt-4">
+        <p class="mb-2 text-xs font-semibold text-slate-500">{{ __('shop.language') }}</p>
+        <div class="flex flex-wrap gap-2">
+            @php
+                $currentLocale = $appLocale ?? app()->getLocale();
+                $localeNames = ['en' => 'English', 'bn' => 'বাংলা', 'ar' => 'العربية'];
+            @endphp
+            @foreach ($availableLocales ?? ['en'] as $locale)
+                <a href="{{ route('locale.switch', $locale) }}" hreflang="{{ $locale }}" class="rounded-full px-3 py-1.5 text-xs font-semibold {{ $locale === $currentLocale ? 'bg-brand text-white' : 'bg-slate-100 text-ink hover:bg-brand/10 hover:text-brand' }}">{{ $localeNames[$locale] ?? $locale }}</a>
+            @endforeach
+        </div>
+    </div>
 </aside>
 
 <aside id="drawer" data-mode="cart" class="fixed inset-y-0 right-0 z-50 flex w-full max-w-sm translate-x-full flex-col bg-white shadow-2xl transition-transform duration-300" aria-label="Cart" inert>

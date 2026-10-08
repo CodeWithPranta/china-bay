@@ -3,8 +3,8 @@
     $off = $product['off'] ?? 0;
 @endphp
 <article class="relative flex flex-col rounded-lg border border-slate-100 p-3 shadow-sm transition hover:shadow-md">
-    <span class="badge-off absolute left-2 top-2">-{{ $off }}%</span>
-    <button data-wish="{{ $product['id'] }}" aria-label="Toggle wishlist" class="absolute right-2 top-1.5 text-xl text-slate-300 transition hover:scale-110 hover:text-brand">♡</button>
+    <span class="badge-off absolute start-2 top-2">-{{ $off }}%</span>
+    <button data-wish="{{ $product['id'] }}" aria-label="Toggle wishlist" class="absolute end-2 top-1.5 text-xl text-slate-300 transition hover:scale-110 hover:text-brand">♡</button>
     <a href="/product/{{ $product['slug'] }}" class="grid h-28 place-items-center text-6xl" aria-label="{{ $product['name'] }}">{{ $product['emoji'] }}</a>
     <h3 class="mt-2 text-[11px] font-semibold leading-snug">
         <a href="/product/{{ $product['slug'] }}" class="hover:text-brand">{{ $product['name'] }}<br><span class="font-normal text-slate-500">{{ $product['sub'] }}</span></a>

@@ -1,7 +1,11 @@
 <?php
 
+use App\Http\Controllers\LocaleController;
 use App\Support\ShopDemo;
 use Illuminate\Support\Facades\Route;
+
+// Locale switcher (session based, supports LTR + RTL)
+Route::get('/locale/{locale}', LocaleController::class)->name('locale.switch');
 
 // Storefront
 Route::view('/', 'pages.home');

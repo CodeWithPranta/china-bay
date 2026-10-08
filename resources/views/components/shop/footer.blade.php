@@ -1,7 +1,7 @@
 <footer class="rounded-b-sm bg-navy px-5 pt-8 text-white sm:px-6">
     <div class="grid gap-8 text-xs sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1.2fr_1.4fr]">
         <div>
-            <span class="text-3xl font-extrabold">ChinaBay</span>
+            <a href="/" aria-label="ChinaBay home"><x-shop.logo class="h-10 w-auto" /></a>
             <p class="text-[10px] text-slate-300">Quality Meets Connection</p>
             <p class="mt-3 max-w-55 leading-relaxed text-slate-300">China imported electronics, gadgets, home appliances &amp; lifestyle products — cash on delivery across Bangladesh.</p>
             <div class="mt-3 flex flex-wrap gap-2">

@@ -14,9 +14,9 @@
 {{-- Toolbar --}}
 <div class="mt-2 flex flex-wrap items-center gap-2">
     <p id="resultCount" class="text-xs text-slate-500">{{ count($products) }} products found · <span id="echoQ">{{ $q ? '“' . $q . '”' : '' }}</span></p>
-    <div class="ml-auto flex items-center gap-2 text-xs">
+    <div class="ms-auto flex items-center gap-2 text-xs">
         <label class="flex items-center gap-1.5 text-slate-500">Sort
-            <select id="sortSel" class="rounded-md border border-slate-200 bg-white px-2 py-1.5 text-ink">
+            <select id="sortSel" class="max-w-36 rounded-md border border-slate-200 bg-white px-2 py-1.5 text-ink sm:max-w-none">
                 <option value="">Featured</option>
                 <option value="lo" {{ request('sort') === 'lo' ? 'selected' : '' }}>Price: low → high</option>
                 <option value="hi" {{ request('sort') === 'hi' ? 'selected' : '' }}>Price: high → low</option>
@@ -25,42 +25,68 @@
         </label>
     </div>
 </div>
-<div id="pills" class="mt-2 flex gap-2 overflow-x-auto pb-1 text-xs">
-    <button data-pill="all" class="rounded-full border px-3 py-1.5 font-semibold {{ $activeCat === 'all' ? 'border-brand bg-brand text-white' : 'border-slate-200 hover:border-brand hover:text-brand' }}">All · সব</button>
+<div id="pills" class="-mx-3 mt-3 flex snap-x gap-2 overflow-x-auto px-3 pb-1 text-xs [scrollbar-width:none] sm:mx-0 sm:px-0 [&::-webkit-scrollbar]:hidden">
+    <button data-pill="all" class="shrink-0 snap-start whitespace-nowrap rounded-full border px-4 py-2 font-medium shadow-sm transition {{ $activeCat === 'all' ? 'border-brand bg-brand font-semibold text-white' : 'border-slate-200 bg-white text-ink hover:border-brand hover:text-brand' }}">All · সব</button>
     @foreach ($cats as $c)
-        <button data-pill="{{ $c['slug'] }}" class="whitespace-nowrap rounded-full border px-3 py-1.5 {{ $activeCat === $c['slug'] ? 'border-brand bg-brand text-white font-semibold' : 'border-slate-200 hover:border-brand hover:text-brand' }}">{{ $c['emoji'] }} {{ $c['en'] }}</button>
+        <button data-pill="{{ $c['slug'] }}" class="shrink-0 snap-start whitespace-nowrap rounded-full border px-4 py-2 shadow-sm transition {{ $activeCat === $c['slug'] ? 'border-brand bg-brand font-semibold text-white' : 'border-slate-200 bg-white font-medium text-ink hover:border-brand hover:text-brand' }}">{{ $c['emoji'] }} {{ $c['en'] }}</button>
     @endforeach
 </div>
 
-<div class="mt-4 flex gap-5 pb-8" x-data="{ open: false }">
-    {{-- Sidebar desktop / collapsible mobile --}}
-    <button @click="open = !open" class="mb-1 rounded-md border border-slate-200 px-3 py-2 text-xs font-semibold lg:hidden">☰ Filters</button>
-    <aside :class="open ? 'block' : 'hidden'" class="w-56 shrink-0 space-y-4 text-xs lg:block" x-data="{ cats: ['{{ $activeCat }}'], max: 15000, min: 500, rate: 0, avail: false }">
+<div class="mt-4 pb-8 lg:flex lg:gap-5" x-data="{ filtersOpen: false }" @keydown.escape.window="filtersOpen = false">
+    {{-- Mobile filter bar --}}
+    <div class="mb-3 lg:hidden">
+        <button @click="filtersOpen = true" class="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-xs font-semibold shadow-sm transition active:scale-[.98]">
+            <svg class="size-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16M7 12h10M10 18h4" /></svg>
+            Filters · ফিল্টার
+            <span id="filterCount" class="hidden min-w-5 place-items-center rounded-full bg-brand px-1.5 py-0.5 text-[10px] font-bold text-white"></span>
+        </button>
+    </div>
+
+    {{-- Overlay (mobile only) --}}
+    <div x-show="filtersOpen" x-cloak x-transition.opacity.duration.200ms @click="filtersOpen = false" class="fixed inset-0 z-40 bg-black/50 lg:hidden" aria-hidden="true"></div>
+
+    {{-- Sidebar: slide-over drawer on mobile, static column on desktop --}}
+    <aside :class="filtersOpen ? 'translate-x-0' : '-translate-x-full'"
+        class="fixed inset-y-0 left-0 z-50 w-72 max-w-[85vw] space-y-4 overflow-y-auto bg-white p-4 text-xs shadow-2xl transition-transform duration-300 lg:static lg:z-auto lg:block lg:w-56 lg:shrink-0 lg:translate-x-0 lg:bg-transparent lg:p-0 lg:shadow-none"
+        aria-label="Product filters">
+        <div class="flex items-center justify-between lg:hidden">
+            <b class="text-sm">Filters · ফিল্টার</b>
+            <button @click="filtersOpen = false" class="grid size-9 place-items-center rounded-full bg-slate-100 hover:bg-brand hover:text-white" aria-label="Close filters">
+                <svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18" /></svg>
+            </button>
+        </div>
         <div class="card !p-3">
-            <b class="text-sm">Category · ক্যাটাগরি</b>
+            <div class="flex items-center justify-between">
+                <b class="text-sm">Category · ক্যাটাগরি</b>
+                <button id="clearCats" class="text-[11px] font-medium text-brand hover:underline lg:hidden">Clear</button>
+            </div>
             <ul class="mt-2 space-y-1.5">
                 @foreach ($cats as $c)
-                    <li><label class="flex items-center gap-2"><input type="checkbox" class="fCat accent-[#c8102e]" value="{{ $c['slug'] }}" {{ $activeCat === $c['slug'] ? 'checked' : '' }}> {{ $c['emoji'] }} {{ $c['en'] }}</label></li>
+                    <li><label class="flex items-center gap-2 py-0.5"><input type="checkbox" class="fCat size-4 accent-[#c8102e]" value="{{ $c['slug'] }}" {{ $activeCat === $c['slug'] ? 'checked' : '' }}> {{ $c['emoji'] }} {{ $c['en'] }}</label></li>
                 @endforeach
             </ul>
         </div>
         <div class="card !p-3">
             <b class="text-sm">Price · দাম (৳)</b>
             <div class="mt-2 space-y-1.5">
-                <label class="flex items-center gap-2"><input type="radio" name="pr" class="fPrice accent-[#c8102e]" value=""> All prices</label>
-                <label class="flex items-center gap-2"><input type="radio" name="pr" class="fPrice accent-[#c8102e]" value="0-1500"> Under ৳1,500</label>
-                <label class="flex items-center gap-2"><input type="radio" name="pr" class="fPrice accent-[#c8102e]" value="1500-3000"> ৳1,500 – ৳3,000</label>
-                <label class="flex items-center gap-2"><input type="radio" name="pr" class="fPrice accent-[#c8102e]" value="3000-99999"> Above ৳3,000</label>
+                <label class="flex items-center gap-2 py-0.5"><input type="radio" name="pr" class="fPrice size-4 accent-[#c8102e]" value=""> All prices</label>
+                <label class="flex items-center gap-2 py-0.5"><input type="radio" name="pr" class="fPrice size-4 accent-[#c8102e]" value="0-1500"> Under ৳1,500</label>
+                <label class="flex items-center gap-2 py-0.5"><input type="radio" name="pr" class="fPrice size-4 accent-[#c8102e]" value="1500-3000"> ৳1,500 – ৳3,000</label>
+                <label class="flex items-center gap-2 py-0.5"><input type="radio" name="pr" class="fPrice size-4 accent-[#c8102e]" value="3000-99999"> Above ৳3,000</label>
             </div>
         </div>
         <div class="card !p-3">
             <b class="text-sm">Rating · রেটিং</b>
             <div class="mt-2 space-y-1.5">
-                <label class="flex items-center gap-2"><input type="radio" name="rt" class="fRate accent-[#c8102e]" value="0" checked> Any</label>
-                <label class="flex items-center gap-2"><input type="radio" name="rt" class="fRate accent-[#c8102e]" value="4.5"> ★ 4.5+</label>
-                <label class="flex items-center gap-2"><input type="radio" name="rt" class="fRate accent-[#c8102e]" value="4.7"> ★ 4.7+</label>
+                <label class="flex items-center gap-2 py-0.5"><input type="radio" name="rt" class="fRate size-4 accent-[#c8102e]" value="0" checked> Any</label>
+                <label class="flex items-center gap-2 py-0.5"><input type="radio" name="rt" class="fRate size-4 accent-[#c8102e]" value="4.5"> ★ 4.5+</label>
+                <label class="flex items-center gap-2 py-0.5"><input type="radio" name="rt" class="fRate size-4 accent-[#c8102e]" value="4.7"> ★ 4.7+</label>
             </div>
-            <label class="mt-2 flex items-center gap-2"><input type="checkbox" id="fAvail" class="accent-[#c8102e]"> In stock only</label>
+            <label class="mt-2 flex items-center gap-2 py-0.5"><input type="checkbox" id="fAvail" class="size-4 accent-[#c8102e]"> In stock only</label>
+        </div>
+        <div class="sticky bottom-0 flex gap-2 bg-white pb-1 pt-2 lg:hidden">
+            <button id="clearFilters" class="btn-outline flex-1 py-2.5 text-xs">Clear all</button>
+            <button @click="filtersOpen = false" class="btn flex-1 py-2.5 text-xs">Show results</button>
         </div>
     </aside>
 
@@ -95,8 +121,8 @@ window.CB_PRODUCTS = @json(collect($products)->mapWithKeys(fn($p) => [$p['id'] =
     const count = document.getElementById('resultCount');
     const all = Object.values(window.CB_PRODUCTS);
     const card = (p) => `<article class="relative flex flex-col rounded-lg border border-slate-100 p-3 shadow-sm transition hover:shadow-md">
-        <span class="badge-off absolute left-2 top-2">-${p.off}%</span>
-        <button data-wish="${p.id}" class="absolute right-2 top-1.5 text-xl text-slate-300 hover:text-brand">♡</button>
+        <span class="badge-off absolute start-2 top-2">-${p.off}%</span>
+        <button data-wish="${p.id}" class="absolute end-2 top-1.5 text-xl text-slate-300 hover:text-brand">♡</button>
         <a href="/product/${p.slug}" class="grid h-28 place-items-center text-6xl">${p.emoji}</a>
         <h3 class="mt-2 text-[11px] font-semibold leading-snug"><a href="/product/${p.slug}" class="hover:text-brand">${p.name}<br><span class="font-normal text-slate-500">${p.sub}</span></a></h3>
         <p class="mt-1 text-[10px] text-slate-400"><s>৳ ${Number(p.old).toLocaleString()}</s> <b class="text-sm text-brand">৳ ${Number(p.price).toLocaleString()}</b></p>
@@ -128,8 +154,28 @@ window.CB_PRODUCTS = @json(collect($products)->mapWithKeys(fn($p) => [$p['id'] =
         grid.classList.toggle('hidden', !list.length);
         empty.classList.toggle('hidden', !!list.length);
         count.innerHTML = list.length + ' products found · <span>' + (params.get('q') ? '“' + params.get('q').replace(/</g, '&lt;') + '”' : '') + '</span>';
+        const n = document.querySelectorAll('.fCat:checked').length
+            + (document.querySelector('.fPrice:checked')?.value ? 1 : 0)
+            + (parseFloat(document.querySelector('.fRate:checked')?.value || '0') > 0 ? 1 : 0)
+            + (document.getElementById('fAvail')?.checked ? 1 : 0);
+        const badge = document.getElementById('filterCount');
+        if (badge) {
+            badge.textContent = n;
+            badge.classList.toggle('hidden', !n);
+            badge.classList.toggle('grid', !!n);
+        }
         window.ChinaBay?.sync?.();
     }
+    function clearAll() {
+        document.querySelectorAll('.fCat').forEach((c) => { c.checked = false; });
+        document.querySelectorAll('.fPrice').forEach((r, i) => { r.checked = i === 0; });
+        document.querySelectorAll('.fRate').forEach((r, i) => { r.checked = i === 0; });
+        const avail = document.getElementById('fAvail');
+        if (avail) { avail.checked = false; }
+        paint();
+    }
+    document.getElementById('clearFilters')?.addEventListener('click', clearAll);
+    document.getElementById('clearCats')?.addEventListener('click', clearAll);
     document.querySelectorAll('.fCat,.fPrice,.fRate,#fAvail').forEach((el) => el.addEventListener('change', paint));
     document.getElementById('sortSel')?.addEventListener('change', paint);
     document.getElementById('clearF')?.addEventListener('click', () => {
@@ -141,8 +187,9 @@ window.CB_PRODUCTS = @json(collect($products)->mapWithKeys(fn($p) => [$p['id'] =
         document.querySelectorAll('.fCat').forEach((c) => { c.checked = c.value === v; });
         const url = v === 'all' ? '/shop' : '/shop?cat=' + v;
         history.replaceState(null, '', url);
-        document.querySelectorAll('[data-pill]').forEach((x) => x.className = 'whitespace-nowrap rounded-full border border-slate-200 px-3 py-1.5 hover:border-brand hover:text-brand');
-        b.className = 'whitespace-nowrap rounded-full border border-brand bg-brand px-3 py-1.5 font-semibold text-white';
+        const base = 'shrink-0 snap-start whitespace-nowrap rounded-full border px-4 py-2 shadow-sm transition ';
+        document.querySelectorAll('[data-pill]').forEach((x) => { x.className = base + 'border-slate-200 bg-white font-medium text-ink hover:border-brand hover:text-brand'; });
+        b.className = base + 'border-brand bg-brand font-semibold text-white';
         paint();
     }));
     paint();
