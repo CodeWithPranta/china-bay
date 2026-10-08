@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ChinaBay – Quality Meets Connection</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Hind+Siliguri:wght@400;500;600;700&display=swap" rel="stylesheet">
+<!-- Tailwind CSS v4 browser build. For production: npm i tailwindcss @tailwindcss/cli -->
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+<style type="text/tailwindcss">
+@theme {
+  --font-sans: "Inter", "Hind Siliguri", system-ui, sans-serif;
+  --color-brand: #c8102e;
+  --color-brand-dark: #a50d25;
+  --color-ink: #1b2233;
+  --color-navy: #1c2536;
+}
+@layer components {
+  .btn { @apply inline-flex items-center justify-center gap-2 rounded-md bg-brand font-semibold text-white transition hover:bg-brand-dark active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand; }
+  .h2 { @apply text-xl font-extrabold text-ink sm:text-2xl; }
+  .h2 span { @apply text-brand; }
+  .slide { @apply absolute inset-0 grid items-center gap-4 p-5 opacity-0 transition-opacity duration-700 pointer-events-none md:grid-cols-2 md:p-10; }
+  .slide.on { @apply opacity-100 pointer-events-auto; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition-duration: 0s !important; } }
+</style>
+</head>
+<body class="bg-white font-sans text-ink antialiased">
+<div class="mx-auto max-w-[1280px] px-3 sm:px-5">
+
+<!-- Top bar -->
+<div class="flex items-center justify-between gap-4 rounded-t-sm bg-brand px-4 py-2 text-[11px] text-white">
+  <div class="flex flex-wrap gap-x-6 gap-y-1"><span>🚚 Fast &amp; Reliable Delivery</span><span class="hidden sm:inline">🛡️ Secure Packaging</span><span class="hidden md:inline">🌐 Worldwide Coverage</span></div>
+  <span class="hidden font-medium lg:block">বিশ্বের সেরা পণ্য এখন আপনার হাতের নাগালে ❤️</span>
+</div>
+
+<!-- Header -->
+<header class="sticky top-0 z-30 flex items-center gap-3 bg-white/95 py-3 backdrop-blur lg:gap-8 lg:py-4">
+  <button data-act="menu" class="group grid size-10 place-items-center rounded-xl bg-brand/10 text-brand transition hover:bg-brand hover:text-white active:scale-95 lg:hidden" aria-label="Open menu"><svg class="size-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16"/><path d="M4 12h10"/><path d="M4 17h16"/></svg></button>
+  <a href="#" class="shrink-0 leading-none"><span class="text-2xl font-extrabold tracking-tight text-brand sm:text-4xl">ChinaBay</span><span class="hidden text-[10px] text-slate-500 sm:block">Quality Meets Connection</span></a>
+  <div class="relative hidden flex-1 md:block" id="searchWrap">
+    <form id="searchForm" class="flex overflow-hidden rounded-full border border-slate-200 bg-slate-50 focus-within:border-brand" role="search">
+      <input id="q" type="search" autocomplete="off" placeholder="Search for products..." class="min-w-0 flex-1 bg-transparent px-5 py-2.5 text-sm outline-none" aria-label="Search products">
+      <button class="grid w-14 place-items-center bg-brand text-white hover:bg-brand-dark" aria-label="Search"><svg class="size-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button>
+    </form>
+    <ul id="suggest" class="absolute inset-x-0 top-full z-40 mt-1 hidden overflow-hidden rounded-lg border border-slate-200 bg-white text-sm shadow-xl"></ul>
+  </div>
+  <div class="ml-auto flex items-center gap-4 text-xs sm:gap-6 md:ml-0">
+    <button data-act="msearch" class="grid size-10 place-items-center rounded-xl bg-slate-100 md:hidden" aria-label="Search"><svg class="size-5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg></button>
+    <a href="#" class="hidden items-center gap-2 sm:flex"><span class="text-2xl">👤</span><span class="hidden xl:block"><b class="block text-[13px]">Account</b><span class="text-slate-500">Login / Register</span></span></a>
+    <button data-act="wishlist" class="relative flex items-center gap-2" aria-label="Wishlist"><span class="text-2xl text-brand">♡</span><span id="wCount" class="absolute -right-2 -top-1 grid size-4 place-items-center rounded-full bg-brand text-[9px] text-white sm:left-4 sm:right-auto">0</span><b class="hidden xl:block">Wishlist</b></button>
+    <button data-act="cart" class="relative flex items-center gap-2" aria-label="Cart"><span class="text-2xl">🛒</span><span id="cCount" class="absolute -right-2 -top-1 grid size-4 place-items-center rounded-full bg-brand text-[9px] text-white transition sm:left-4 sm:right-auto">0</span><b class="hidden xl:block">Cart</b></button>
+  </div>
+</header>
+<form id="mSearch" class="mb-3 hidden md:hidden"><input id="mq" type="search" placeholder="Search for products..." class="w-full rounded-full border border-slate-200 bg-slate-50 px-5 py-2.5 text-sm outline-none focus:border-brand" aria-label="Search products"></form>
+
+<!-- Desktop nav -->
+<nav class="hidden items-center gap-8 border-y border-slate-100 bg-slate-50/60 pr-4 text-[13px] font-medium lg:flex" aria-label="Main">
+  <div class="group relative">
+    <button class="btn !rounded-md px-5 py-2.5 text-sm">☰ All Categories ⌄</button>
+    <ul id="catMenu" class="invisible absolute left-0 top-full z-40 w-60 rounded-lg border border-slate-100 bg-white py-2 opacity-0 shadow-xl transition group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100"></ul>
+  </div>
+  <div class="flex gap-7" id="navLinks"></div>
+</nav>
+
+<main>
+<!-- Hero slider -->
+<section class="relative mt-3 overflow-hidden rounded-md bg-gradient-to-r from-white via-sky-50 to-sky-200" id="hero" aria-roledescription="carousel" aria-label="Promotions">
+  <div class="relative min-h-[26rem] md:min-h-[22rem]" id="slides"></div>
+  <button data-act="prev" class="absolute left-2 top-1/2 hidden size-8 -translate-y-1/2 place-items-center rounded-full bg-white/80 shadow hover:bg-white sm:grid" aria-label="Previous slide">‹</button>
+  <button data-act="next" class="absolute right-2 top-1/2 hidden size-8 -translate-y-1/2 place-items-center rounded-full bg-white/80 shadow hover:bg-white sm:grid" aria-label="Next slide">›</button>
+  <div class="absolute bottom-3 left-1/2 flex -translate-x-1/2 gap-1.5" id="dots"></div>
+</section>
+
+<!-- Categories -->
+<section class="mt-8">
+  <div class="flex items-center justify-between"><h2 class="h2">Shop by <span>Category</span></h2><button data-cat="all" class="text-xs font-medium text-brand hover:underline">View All →</button></div>
+  <ul id="cats" class="-mx-3 mt-4 flex snap-x gap-3 overflow-x-auto px-3 pb-2 text-center sm:mx-0 sm:grid sm:grid-cols-5 sm:overflow-visible sm:px-0 lg:grid-cols-9"></ul>
+</section>
+
+<!-- Trust strip -->
+<section class="mt-6 grid grid-cols-1 gap-4 rounded-md bg-slate-50 px-5 py-4 text-xs sm:grid-cols-2 lg:grid-cols-4" id="trust"></section>
+
+<!-- Featured -->
+<section class="mt-8" id="featured">
+  <div class="flex flex-wrap items-center justify-between gap-2">
+    <h2 class="h2">Featured <span>Products</span> <small id="filterTag" class="ml-2 hidden rounded-full bg-brand/10 px-2 py-0.5 text-xs font-semibold text-brand"></small></h2>
+    <div class="flex items-center gap-3 text-xs">
+      <label class="flex items-center gap-1.5 text-slate-500">Sort <select id="sort" class="rounded-md border border-slate-200 bg-white px-2 py-1 text-ink"><option value="">Featured</option><option value="lo">Price: low to high</option><option value="hi">Price: high to low</option><option value="off">Biggest discount</option></select></label>
+      <button data-cat="all" class="font-medium text-brand hover:underline">Reset</button>
+    </div>
+  </div>
+  <div id="grid" class="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6"></div>
+  <p id="empty" class="hidden py-12 text-center text-slate-500">No products match. <button data-cat="all" class="font-semibold text-brand underline">Show all products</button></p>
+</section>
+
+<!-- Promo banners -->
+<section class="mt-6 grid gap-4 md:grid-cols-3">
+  <a href="#featured" data-cat="toys" class="flex items-center justify-between rounded-lg bg-gradient-to-r from-pink-100 to-pink-50 p-5 transition hover:shadow-md"><div><b class="text-xl text-brand">কিউট ক্যাট টয়</b><p class="text-[11px]">আপনার ছোট্ট সোনার জন্য</p><span class="btn mt-3 px-4 py-1.5 text-[11px]">Shop Now →</span></div><span class="text-6xl">🐱</span></a>
+  <a href="#featured" data-cat="all" class="flex items-center justify-between rounded-lg bg-gradient-to-r from-sky-100 to-amber-50 p-5 transition hover:shadow-md"><div><b class="text-xl text-sky-900">পরিস্কার ল্যাগেজ কম্বো</b><p class="text-[11px]">ভ্রমণ হোক আরও আরামদায়ক</p><span class="mt-3 inline-block rounded-md bg-sky-700 px-4 py-1.5 text-[11px] font-semibold text-white">Shop Now →</span></div><span class="text-6xl">🧳</span></a>
+  <a href="#featured" data-cat="gadgets" class="flex items-center justify-between rounded-lg bg-gradient-to-r from-red-700 to-red-500 p-5 text-white transition hover:shadow-md"><div><b class="text-xl">সেরা গ্যাজেট</b><p class="text-[11px]">স্মার্ট জীবন, স্মার্ট আপনি</p><span class="mt-3 inline-block rounded-md bg-white px-4 py-1.5 text-[11px] font-semibold text-brand">Shop Now →</span></div><span class="text-6xl">⌚</span></a>
+</section>
+
+<!-- Why choose -->
+<section class="mt-8 pb-8"><h2 class="h2">Why Choose <span>ChinaBay?</span></h2><div id="why" class="mt-4 grid grid-cols-1 gap-4 text-xs sm:grid-cols-2 lg:grid-cols-4"></div></section>
+</main>
+
+<!-- Footer -->
+<footer class="rounded-b-sm bg-navy px-5 pt-8 text-white sm:px-6">
+  <div class="grid gap-8 text-xs sm:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1.2fr_1.4fr]">
+    <div><span class="text-3xl font-extrabold">ChinaBay</span><p class="text-[10px] text-slate-300">Quality Meets Connection</p></div>
+    <div><h3 class="mb-3 font-semibold">Quick Links</h3><ul class="space-y-1.5 text-slate-300"><li><a href="#" class="hover:text-white">Home</a></li><li><a href="#featured" class="hover:text-white">Shop</a></li><li><a href="#" class="hover:text-white">About Us</a></li><li><a href="#" class="hover:text-white">Contact Us</a></li></ul></div>
+    <div><h3 class="mb-3 font-semibold">Help</h3><ul class="space-y-1.5 text-slate-300"><li><a href="#" class="hover:text-white">Shipping Policy</a></li><li><a href="#" class="hover:text-white">Return &amp; Refund</a></li><li><a href="#" class="hover:text-white">Terms &amp; Conditions</a></li><li><a href="#" class="hover:text-white">Privacy Policy</a></li></ul></div>
+    <div><h3 class="mb-3 font-semibold">Contact Us</h3><ul class="space-y-2 text-slate-300"><li><a href="tel:+8801849415277">📞 +8801849415277</a></li><li><a href="mailto:info@chinabaybd.com">✉️ info@chinabaybd.com</a></li><li>🌐 www.chinabaybd.com</li></ul></div>
+    <div><h3 class="mb-3 font-semibold">Follow Us</h3>
+      <div class="flex gap-2"><a href="#" aria-label="Facebook" class="grid size-6 place-items-center rounded-full bg-blue-600 text-[10px] font-bold">f</a><a href="#" aria-label="Instagram" class="grid size-6 place-items-center rounded-full bg-pink-600 text-[10px]">◎</a><a href="#" aria-label="YouTube" class="grid size-6 place-items-center rounded-full bg-red-600 text-[10px]">▶</a><a href="#" aria-label="TikTok" class="grid size-6 place-items-center rounded-full bg-black text-[10px]">♪</a></div>
+      <p class="mb-2 mt-4 font-semibold">Subscribe to our newsletter</p>
+      <form id="news" class="flex overflow-hidden rounded" novalidate><input id="email" type="email" required placeholder="Your email address" class="min-w-0 flex-1 bg-white px-3 py-2 text-[11px] text-ink outline-none" aria-label="Email"><button class="btn rounded-none px-3" aria-label="Subscribe">→</button></form>
+      <p id="newsMsg" class="mt-1 h-4 text-[11px]"></p>
+    </div>
+  </div>
+  <div class="mt-6 flex flex-wrap justify-between gap-2 border-t border-white/10 py-3 text-[10px] text-slate-300"><span>© 2026 ChinaBay. All rights reserved.</span><span>Quality Meets Connection ❤️</span></div>
+</footer>
+</div>
+
+<!-- Mobile menu -->
+<div id="ovl" class="fixed inset-0 z-40 hidden bg-black/50"></div>
+<aside id="menu" class="fixed inset-y-0 left-0 z-50 w-72 -translate-x-full overflow-y-auto bg-white p-5 transition-transform duration-300" aria-label="Menu" inert>
+  <div class="flex items-center justify-between"><b class="text-2xl font-extrabold text-brand">ChinaBay</b><button data-act="close" class="grid size-9 place-items-center rounded-full bg-slate-100 hover:bg-brand hover:text-white" aria-label="Close"><svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+  <div id="mNav" class="mt-5 flex flex-col text-sm font-medium"></div>
+  <h3 class="mb-2 mt-6 text-xs font-semibold text-slate-500">Categories</h3><ul id="mCats" class="text-sm"></ul>
+</aside>
+
+<!-- Cart / wishlist drawer -->
+<aside id="drawer" class="fixed inset-y-0 right-0 z-50 flex w-full max-w-sm translate-x-full flex-col bg-white shadow-2xl transition-transform duration-300" aria-label="Cart" inert>
+  <div class="flex items-center justify-between border-b border-slate-100 p-4"><h2 id="dTitle" class="text-lg font-extrabold">Your Cart</h2><button data-act="close" class="grid size-9 place-items-center rounded-full bg-slate-100 hover:bg-brand hover:text-white" aria-label="Close"><svg class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+  <div id="dBody" class="flex-1 overflow-y-auto p-4"></div>
+  <div id="dFoot" class="border-t border-slate-100 p-4"></div>
+</aside>
+<div id="toast" class="pointer-events-none fixed bottom-5 left-1/2 z-[60] -translate-x-1/2 translate-y-4 rounded-full bg-ink px-5 py-2.5 text-sm text-white opacity-0 shadow-lg transition" role="status"></div>
+
+<script>
+const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const tk = n => '৳ ' + n.toLocaleString('en-US');
+const CATS = [
+  ['electronics','Electronics','ইলেকট্রনিক্স','📱','bg-sky-50'],['gadgets','Gadgets','গ্যাজেট','🎧','bg-cyan-50'],
+  ['appliances','Home Appliances','হোম অ্যাপ্লায়েন্স','🍳','bg-slate-100'],['fashion','Fashion & Lifestyle','ফ্যাশন ও লাইফস্টাইল','👜','bg-amber-50'],
+  ['beauty','Beauty & Personal Care','বিউটি ও পার্সোনাল কেয়ার','💄','bg-pink-50'],['decor','Home Decor','হোম ডেকোর','🛋️','bg-yellow-50'],
+  ['toys','Toys & Kids','টয়স ও কিডস','🧸','bg-orange-50'],['kitchen','Kitchen & Dining','কিচেন ও ডাইনিং','🍲','bg-slate-100']];
+const P = [
+  [1,'TWS Wireless Earbuds','Bluetooth 5.3',1999,2499,'🎧','gadgets',124],[2,'Smart Watch','Fitness Tracker',2999,3499,'⌚','electronics',96],
+  [3,'Air Fryer 5.5L','Healthy Cooking',7399,8999,'🍟','appliances',86],[4,'Wireless Headphones','Noise Cancelling',2649,2999,'🎧','gadgets',75],
+  [5,'Power Bank 20000mAh','Fast Charging',1619,1799,'🔋','electronics',54],[6,'Cute Cat Toy','With Sound',1499,1999,'🐱','toys',32]
+].map(([id,name,sub,price,old,emoji,cat,rv]) => ({id,name,sub,price,old,emoji,cat,rv,off:Math.round((1-price/old)*100)}));
+const NAV = [['Home','#'],['Shop','#featured'],['New Arrivals','#featured'],['Deals','#featured'],['Track Order','#'],['About Us','#'],['Contact','#']];
+const TRUST = [['🏅','100% Original Products','অরিজিনাল পণ্য'],['↺','Easy Return & Refund','সহজ রিটার্ন ও রিফান্ড'],['💵','Cash on Delivery','ক্যাশ অন ডেলিভারি'],['🎧','24/7 Customer Support','সার্বক্ষণিক সাপোর্ট']];
+const WHY = [['🛡️','Trusted & Secure','নির্ভরযোগ্য ও নিরাপদ শপিং'],['🏷️','Best Price','সেরা দামে সেরা পণ্য'],['✈️','Global Shipping','বিশ্বজুড়ে দ্রুত ডেলিভারি'],['🎧','Dedicated Support','সবসময় আপনার পাশে']];
+const SLIDES = [
+  ['🇨🇳 China Imported Products','বিশ্বের সেরা পণ্য','এখন আপনার কাছে','ইলেকট্রনিক্স, গ্যাজেট, হোম অ্যাপ্লায়েন্স, লাইফস্টাইল প্রোডাক্টস এবং আরও অনেক কিছু – সবই এক ছাদের নিচে।','🐼','from-red-600 to-red-800','all'],
+  ['🔥 Hot Deals','স্মার্ট গ্যাজেটে','বিশাল ছাড়','সেরা দামে স্মার্ট ওয়াচ, ইয়ারবাড এবং পাওয়ার ব্যাংক – সীমিত সময়ের জন্য।','⌚','from-slate-700 to-slate-900','gadgets'],
+  ['🧸 Kids Corner','ছোটদের জন্য','মজার খেলনা','আপনার ছোট্ট সোনার জন্য আদরের সব খেলনা এখন হাতের নাগালে।','🐱','from-pink-500 to-rose-600','toys']];
+
+// persistent state
+const load = (k, d) => { try { return JSON.parse(localStorage.getItem(k)) ?? d } catch { return d } };
+const save = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)) } catch {} };
+let cart = load('cb_cart', {}), wish = load('cb_wish', []), cat = 'all', query = '', sortBy = '', drawerMode = 'cart';
+
+/* ---------- static renders ---------- */
+$('#navLinks').innerHTML = NAV.map(([t,h],i) => `<a href="${h}" class="py-3 ${i?'hover:text-brand':'border-b-2 border-brand text-brand'}">${t}</a>`).join('');
+$('#mNav').innerHTML = NAV.map(([t,h]) => `<a href="${h}" data-act="close" class="border-b border-slate-100 py-3 hover:text-brand">${t}</a>`).join('');
+const catLi = (c, cls) => `<li><button data-cat="${c[0]}" class="${cls}"><span class="grid ${c[4]}">${c[3]}</span></button></li>`;
+$('#cats').innerHTML = CATS.map(c => `<li class="w-24 shrink-0 snap-start sm:w-auto"><button data-cat="${c[0]}" class="group block w-full" aria-pressed="false"><span class="mx-auto grid size-16 place-items-center rounded-xl ${c[4]} text-3xl ring-brand transition group-hover:-translate-y-0.5 group-hover:ring-2 group-aria-pressed:ring-2">${c[3]}</span><b class="mt-2 block text-[11px] leading-tight">${c[1]}</b><small class="text-[10px] leading-tight text-slate-500">${c[2]}</small></button></li>`).join('')
+  + `<li class="w-24 shrink-0 sm:w-auto"><button data-cat="all" class="block w-full"><span class="mx-auto grid size-16 place-items-center rounded-full bg-slate-100 text-2xl text-slate-500">⠿</span><b class="mt-2 block text-[11px]">More</b><small class="text-[10px] text-slate-500">আরও দেখুন</small></button></li>`;
+$('#catMenu').innerHTML = CATS.map(c => `<li><button data-cat="${c[0]}" class="flex w-full items-center gap-3 px-4 py-2 text-left hover:bg-slate-50 hover:text-brand">${c[3]} ${c[1]}</button></li>`).join('');
+$('#mCats').innerHTML = CATS.map(c => `<li><button data-cat="${c[0]}" data-act="close" class="flex w-full items-center gap-3 py-2.5 text-left">${c[3]} ${c[1]}</button></li>`).join('');
+$('#trust').innerHTML = TRUST.map(([i,a,b]) => `<div class="flex items-center gap-3"><span class="text-2xl text-brand">${i}</span><p><b class="block">${a}</b><span class="text-slate-500">${b}</span></p></div>`).join('');
+$('#why').innerHTML = WHY.map(([i,a,b]) => `<div class="flex items-center gap-3 rounded-lg border border-slate-100 p-3 lg:rounded-none lg:border-0 lg:border-l lg:first:border-0"><span class="text-3xl text-brand">${i}</span><p><b class="block text-[13px]">${a}</b><span class="text-slate-500">${b}</span></p></div>`).join('');
+$('#slides').innerHTML = SLIDES.map(([tag,h1,h2,p,e,g,c],i) => `<article class="slide ${i?'':'on'}" role="group" aria-roledescription="slide" aria-label="${i+1} of ${SLIDES.length}"><div>
+  <span class="inline-block rounded-full border border-brand/30 bg-white px-3 py-1 text-[11px] font-semibold text-brand">${tag}</span>
+  <h1 class="mt-3 text-3xl font-bold leading-tight sm:text-4xl md:text-5xl">${h1}<br><span class="text-brand">${h2}</span></h1>
+  <p class="mt-3 max-w-md text-sm leading-relaxed">${p}</p>
+  <button data-cat="${c}" data-go class="btn mt-5 rounded-full px-7 py-3 text-sm">Shop Now →</button></div>
+  <div class="relative hidden min-h-56 place-items-center md:grid"><span class="absolute right-2 top-0 font-serif text-xl italic text-brand">From China<br>To Your Door</span>
+  <div class="grid h-48 w-60 place-items-center rounded bg-gradient-to-br ${g} text-8xl shadow-xl">${e}</div></div></article>`).join('');
+$('#dots').innerHTML = SLIDES.map((_,i) => `<button data-slide="${i}" class="h-1.5 rounded-full bg-slate-300 transition-all aria-current:w-5 aria-current:bg-brand w-1.5" aria-label="Go to slide ${i+1}"></button>`).join('');
+
+/* ---------- slider ---------- */
+let si = 0, timer;
+const show = n => { si = (n + SLIDES.length) % SLIDES.length;
+  $$('.slide').forEach((s,i) => s.classList.toggle('on', i === si));
+  $$('#dots button').forEach((d,i) => i === si ? d.setAttribute('aria-current','true') : d.removeAttribute('aria-current')); };
+const auto = () => { clearInterval(timer); if (!matchMedia('(prefers-reduced-motion: reduce)').matches) timer = setInterval(() => show(si + 1), 5000); };
+show(0); auto();
+$('#hero').addEventListener('mouseenter', () => clearInterval(timer)); $('#hero').addEventListener('mouseleave', auto);
+let tx = 0; $('#hero').addEventListener('touchstart', e => tx = e.touches[0].clientX, {passive:true});
+$('#hero').addEventListener('touchend', e => { const d = e.changedTouches[0].clientX - tx; if (Math.abs(d) > 40) { show(si + (d < 0 ? 1 : -1)); auto(); } });
+
+/* ---------- products ---------- */
+const stars = '★★★★★';
+function renderGrid() {
+  const q = query.trim().toLowerCase();
+  let list = P.filter(p => (cat === 'all' || p.cat === cat) && (!q || (p.name + ' ' + p.sub).toLowerCase().includes(q)));
+  if (sortBy) list.sort((a,b) => sortBy === 'lo' ? a.price - b.price : sortBy === 'hi' ? b.price - a.price : b.off - a.off);
+  $('#grid').innerHTML = list.map(p => { const w = wish.includes(p.id), n = cart[p.id] || 0; return `
+  <article class="relative flex flex-col rounded-lg border border-slate-100 p-3 shadow-sm transition hover:shadow-md">
+    <span class="absolute left-2 top-2 rounded-full bg-brand px-1.5 py-0.5 text-[9px] font-bold text-white">-${p.off}%</span>
+    <button data-wish="${p.id}" aria-pressed="${w}" aria-label="Toggle wishlist" class="absolute right-2 top-1.5 text-xl ${w?'text-brand':'text-slate-300'} transition hover:scale-110">${w?'♥':'♡'}</button>
+    <div class="grid h-28 place-items-center text-6xl">${p.emoji}</div>
+    <h3 class="mt-2 text-[11px] font-semibold leading-snug">${p.name}<br><span class="font-normal text-slate-500">${p.sub}</span></h3>
+    <p class="mt-1 text-[10px] text-slate-400"><s>${tk(p.old)}</s> <b class="text-sm text-brand">${tk(p.price)}</b></p>
+    <p class="text-[10px] text-amber-400">${stars} <span class="text-slate-400">(${p.rv})</span></p>
+    <button data-add="${p.id}" class="btn mt-auto w-full py-1.5 text-[11px]">🛒 Add to Cart${n ? ` (${n})` : ''}</button>
+  </article>`; }).join('');
+  $('#empty').classList.toggle('hidden', list.length > 0);
+  const tag = $('#filterTag'), c = CATS.find(c => c[0] === cat);
+  tag.textContent = c ? c[1] : ''; tag.classList.toggle('hidden', !c);
+  $$('#cats [data-cat]').forEach(b => b.setAttribute('aria-pressed', b.dataset.cat === cat));
+}
+
+/* ---------- cart / wishlist ---------- */
+const totalQty = () => Object.values(cart).reduce((a,b) => a + b, 0);
+function bump() { const c = $('#cCount'); c.classList.add('scale-150'); setTimeout(() => c.classList.remove('scale-150'), 200); }
+function sync() {
+  $('#cCount').textContent = totalQty(); $('#wCount').textContent = wish.length;
+  save('cb_cart', cart); save('cb_wish', wish); renderGrid(); renderDrawer();
+}
+function renderDrawer() {
+  const body = $('#dBody'), foot = $('#dFoot');
+  if (drawerMode === 'cart') {
+    $('#dTitle').textContent = 'Your Cart';
+    const items = Object.entries(cart).map(([id,q]) => [P.find(p => p.id == id), q]);
+    if (!items.length) { body.innerHTML = '<p class="py-16 text-center text-slate-500">Your cart is empty.<br>Add a product to get started.</p>'; foot.innerHTML = ''; return; }
+    body.innerHTML = items.map(([p,q]) => `<div class="flex items-center gap-3 border-b border-slate-100 py-3"><span class="grid size-14 place-items-center rounded-lg bg-slate-50 text-3xl">${p.emoji}</span>
+      <div class="min-w-0 flex-1 text-xs"><b class="block truncate">${p.name}</b><span class="text-brand font-semibold">${tk(p.price)}</span>
+      <div class="mt-1.5 inline-flex items-center rounded border border-slate-200"><button data-qty="${p.id}" data-d="-1" class="px-2 py-0.5" aria-label="Decrease">−</button><span class="w-6 text-center">${q}</span><button data-qty="${p.id}" data-d="1" class="px-2 py-0.5" aria-label="Increase">+</button></div></div>
+      <button data-rm="${p.id}" class="text-slate-400 hover:text-brand" aria-label="Remove ${p.name}">🗑</button></div>`).join('');
+    const sub = items.reduce((a,[p,q]) => a + p.price * q, 0);
+    foot.innerHTML = `<div class="mb-3 flex justify-between font-semibold"><span>Subtotal</span><span>${tk(sub)}</span></div><button data-act="checkout" class="btn w-full py-3 text-sm">Checkout · Cash on Delivery</button>`;
+  } else {
+    $('#dTitle').textContent = 'Your Wishlist'; foot.innerHTML = '';
+    body.innerHTML = wish.length ? wish.map(id => { const p = P.find(x => x.id === id); return `<div class="flex items-center gap-3 border-b border-slate-100 py-3"><span class="grid size-14 place-items-center rounded-lg bg-slate-50 text-3xl">${p.emoji}</span><div class="flex-1 text-xs"><b class="block">${p.name}</b><span class="font-semibold text-brand">${tk(p.price)}</span></div><button data-add="${p.id}" class="btn px-3 py-1.5 text-[11px]">Add</button><button data-wish="${p.id}" class="text-slate-400 hover:text-brand" aria-label="Remove">✕</button></div>`; }).join('')
+      : '<p class="py-16 text-center text-slate-500">No saved items yet.<br>Tap ♡ on a product to save it.</p>';
+  }
+}
+
+/* ---------- ui helpers ---------- */
+let tt; function toast(m) { const t = $('#toast'); t.textContent = m; t.classList.remove('opacity-0','translate-y-4'); clearTimeout(tt); tt = setTimeout(() => t.classList.add('opacity-0','translate-y-4'), 1800); }
+function panel(el, open) { el.toggleAttribute('inert', !open); el.classList.toggle(el.id === 'menu' ? '-translate-x-full' : 'translate-x-full', !open); $('#ovl').classList.toggle('hidden', !open); document.body.classList.toggle('overflow-hidden', open); }
+const closeAll = () => { panel($('#menu'), false); panel($('#drawer'), false); };
+function openDrawer(mode) { drawerMode = mode; renderDrawer(); panel($('#drawer'), true); }
+function setCat(c, go) { cat = c; query = ''; $('#q').value = $('#mq').value = ''; renderGrid(); if (go !== false) $('#featured').scrollIntoView({behavior:'smooth'}); }
+
+/* ---------- events ---------- */
+document.addEventListener('click', e => {
+  const t = e.target.closest('button, a'); if (!t) { $('#suggest').classList.add('hidden'); return; }
+  const d = t.dataset;
+  if (d.add) { cart[d.add] = (cart[d.add] || 0) + 1; sync(); bump(); toast('Added to cart'); }
+  else if (d.wish) { const id = +d.wish; wish = wish.includes(id) ? wish.filter(x => x !== id) : [...wish, id]; sync(); toast(wish.includes(id) ? 'Saved to wishlist' : 'Removed from wishlist'); }
+  else if (d.qty) { const id = d.qty; cart[id] += +d.d; if (cart[id] < 1) delete cart[id]; sync(); }
+  else if (d.rm) { delete cart[d.rm]; sync(); }
+  else if (d.slide) { show(+d.slide); auto(); }
+  else if (d.cat) { if (d.cat !== undefined && t.tagName === 'A') e.preventDefault(); closeAll(); setCat(d.cat); }
+  switch (d.act) {
+    case 'menu': panel($('#menu'), true); break;
+    case 'close': closeAll(); break;
+    case 'cart': openDrawer('cart'); break;
+    case 'wishlist': openDrawer('wish'); break;
+    case 'prev': show(si - 1); auto(); break;
+    case 'next': show(si + 1); auto(); break;
+    case 'msearch': $('#mSearch').classList.toggle('hidden'); $('#mq').focus(); break;
+    case 'checkout': cart = {}; sync(); closeAll(); toast('Order placed — thank you! 🎉'); break;
+  }
+});
+$('#ovl').onclick = closeAll;
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeAll(); $('#suggest').classList.add('hidden'); } });
+$('#sort').onchange = e => { sortBy = e.target.value; renderGrid(); };
+
+// search with live suggestions
+const doSearch = v => { query = v; cat = 'all'; renderGrid(); };
+$('#q').addEventListener('input', e => {
+  const v = e.target.value.trim().toLowerCase(), box = $('#suggest');
+  const m = v ? P.filter(p => (p.name + p.sub).toLowerCase().includes(v)).slice(0, 5) : [];
+  box.innerHTML = m.length ? m.map(p => `<li><button type="button" data-pick="${p.name}" class="flex w-full items-center gap-3 px-4 py-2 text-left hover:bg-slate-50"><span class="text-xl">${p.emoji}</span><span class="flex-1">${p.name}</span><b class="text-brand">${tk(p.price)}</b></button></li>`).join('') : (v ? '<li class="px-4 py-3 text-slate-500">No results</li>' : '');
+  box.classList.toggle('hidden', !v);
+});
+$('#suggest').addEventListener('click', e => { const b = e.target.closest('[data-pick]'); if (b) { $('#q').value = b.dataset.pick; doSearch(b.dataset.pick); $('#suggest').classList.add('hidden'); $('#featured').scrollIntoView({behavior:'smooth'}); } });
+$('#searchForm').onsubmit = e => { e.preventDefault(); doSearch($('#q').value); $('#suggest').classList.add('hidden'); $('#featured').scrollIntoView({behavior:'smooth'}); };
+$('#mSearch').onsubmit = e => { e.preventDefault(); doSearch($('#mq').value); $('#featured').scrollIntoView({behavior:'smooth'}); };
+
+// newsletter
+$('#news').onsubmit = e => { e.preventDefault(); const i = $('#email'), m = $('#newsMsg'), ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(i.value);
+  m.textContent = ok ? 'Thanks for subscribing!' : 'Enter a valid email address.'; m.className = 'mt-1 h-4 text-[11px] ' + (ok ? 'text-emerald-300' : 'text-red-300'); if (ok) i.value = ''; };
+
+sync();
+</script>
+</body>
+</html>
