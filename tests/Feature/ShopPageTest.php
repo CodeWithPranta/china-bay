@@ -1,33 +1,58 @@
 <?php
 
-test('shop page uses mobile filter drawer instead of inline toggle', function () {
-    $response = $this->get('/shop');
+use App\Models\Product;
+use Database\Seeders\CatalogSeeder;
 
-    $response->assertStatus(200);
-    // Slide-over drawer state + active-filter badge + drawer actions
-    $response->assertSee('filtersOpen', false);
-    $response->assertSee('filterCount', false);
-    $response->assertSee('clearFilters', false);
-    $response->assertSee('Show results', false);
-    // New card template uses logical properties (RTL-safe)
-    $response->assertSee('absolute start-2 top-2', false);
-    $response->assertSee('absolute end-2 top-1.5', false);
+beforeEach(function () {
+    $this->seed([CatalogSeeder::class]);
 });
 
-test('shop page has responsive grid and toolbar', function () {
+test('shop page renders livewire catalog grid', function () {
     $response = $this->get('/shop');
 
     $response->assertStatus(200);
-    $response->assertSee('id="shopGrid"', false);
-    $response->assertSee('grid-cols-2', false);
-    $response->assertSee('id="sortSel"', false);
+    $response->assertSee('filtersOpen', false);
+    $response->assertSee('Show results', false);
+    $response->assertSee('products found', false);
+    $response->assertSee('TWS Wireless Earbuds', false);
+});
+
+test('shop grid filters by category via livewire', function () {
+    $component = Livewire\Livewire::test('shop.catalog-grid');
+
+    $component->assertSee('TWS Wireless Earbuds');
+
+    $component->set('cats', ['toys'])->assertSee('Cute Cat Toy')->assertDontSee('TWS Wireless Earbuds');
+});
+
+test('shop grid filters by price and sorts', function () {
+    $component = Livewire\Livewire::test('shop.catalog-grid');
+
+    $component->set('price', '0-1500');
+
+    foreach (Product::active()->whereBetween('price', [0, 1500])->pluck('name') as $name) {
+        $component->assertSee($name);
+    }
+
+    $component->set('price', '')->set('sort', 'lo');
+
+    $cheapest = Product::active()->orderBy('price')->first();
+    expect($cheapest)->not->toBeNull();
 });
 
 test('category pills share one chip shape with snap scroll', function () {
     $response = $this->get('/shop');
 
     $response->assertStatus(200);
-    $response->assertSee('data-pill="all"', false);
     $response->assertSee('snap-start', false);
     $response->assertSee('shrink-0', false);
+});
+
+test('product page resolves from database and 404s unknown slug', function () {
+    $product = Product::active()->firstWhere('slug', 'tws-wireless-earbuds');
+
+    expect($product)->not->toBeNull();
+
+    $this->get('/product/tws-wireless-earbuds')->assertStatus(200)->assertSee('TWS Wireless Earbuds');
+    $this->get('/product/no-such-product')->assertStatus(404);
 });

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\SiteLocale;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
@@ -12,7 +13,8 @@ class LocaleController extends Controller
      */
     public function __invoke(Request $request, string $locale): RedirectResponse
     {
-        $available = config('app.available_locales', ['en']);
+        $available = SiteLocale::activeCodes()
+            ?: config('app.available_locales', ['bn', 'en', 'ar']);
 
         if (! in_array($locale, $available, true)) {
             abort(404);

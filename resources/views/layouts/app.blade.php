@@ -15,8 +15,18 @@
     @else
         <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     @endif
-    {{-- Alpine.js: future Livewire companion. x-data hooks already in place. --}}
+    {{-- Alpine.js: pairs with Livewire (auto-injected assets) for admin DB work. --}}
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    {{-- Admin-editable theme (Settings > Theme) overrides compiled defaults. --}}
+    @php
+        $theme = [
+            '--color-brand' => \App\Models\Setting::get('theme.brand', '#c8102e'),
+            '--color-brand-dark' => \App\Models\Setting::get('theme.brand_dark', '#a50d25'),
+            '--color-ink' => \App\Models\Setting::get('theme.ink', '#1b2233'),
+            '--color-navy' => \App\Models\Setting::get('theme.navy', '#1c2536'),
+        ];
+    @endphp
+    <style>:root { @foreach ($theme as $var => $val){{ $var }}: {{ $val }}; @endforeach }</style>
     @stack('head')
 </head>
 <body class="bg-white font-sans text-ink antialiased" x-data="{ mobileSearch: false }">

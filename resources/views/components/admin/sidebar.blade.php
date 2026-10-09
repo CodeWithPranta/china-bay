@@ -8,6 +8,9 @@
         ['Coupons & Campaigns', '/admin/coupons', '🎟'],
         ['Flash Sales', '/admin/flash-sales', '⚡'],
         ['Reviews', '/admin/reviews', '★'],
+        ['Languages', '/admin/languages', '🌐'],
+        ['Roles', '/admin/roles', '🛡'],
+        ['Team', '/admin/users', '👤'],
         ['Settings', '/admin/settings', '⚙'],
     ];
 @endphp

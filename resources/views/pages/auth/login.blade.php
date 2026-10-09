@@ -10,10 +10,21 @@
             <button @click="tab='otp'" :class="tab==='otp' ? 'bg-white shadow text-brand' : 'text-slate-500'" class="rounded-full py-2">OTP Login</button>
         </div>
         <div x-show="tab==='password'" class="mt-5 space-y-3">
-            <div><label class="label">Phone / Email</label><input class="input" placeholder="01XXXXXXXXX or you@mail.com"></div>
-            <div><label class="label">Password</label><input type="password" class="input" placeholder="••••••••"></div>
-            <div class="flex justify-end text-xs"><a href="/auth/verify" class="text-brand hover:underline">Forgot password?</a></div>
-            <a href="/account" class="btn w-full py-3 text-sm">Login →</a>
+            <form method="POST" action="/auth/login" class="space-y-3">
+                @csrf
+                <div>
+                    <label class="label" for="login">Phone / Email</label>
+                    <input id="login" name="login" value="{{ old('login') }}" required autocomplete="username" class="input @error('login') !border-brand @enderror" placeholder="01XXXXXXXXX or you@mail.com">
+                    @error('login') <p class="mt-1 text-[11px] font-semibold text-brand">{{ $message }}</p> @enderror
+                </div>
+                <div>
+                    <label class="label" for="password">Password</label>
+                    <input id="password" name="password" type="password" required autocomplete="current-password" class="input" placeholder="••••••••">
+                </div>
+                <label class="flex items-center gap-2 text-xs text-slate-500"><input type="checkbox" name="remember" value="1" class="size-4 accent-[#c8102e]"> Remember me</label>
+                <div class="flex justify-end text-xs"><a href="/auth/verify" class="text-brand hover:underline">Forgot password?</a></div>
+                <button type="submit" class="btn w-full py-3 text-sm">Login →</button>
+            </form>
         </div>
         <div x-show="tab==='otp'" x-cloak class="mt-5 space-y-3">
             <div><label class="label">Mobile Number</label><input class="input" placeholder="01XXXXXXXXX"></div>

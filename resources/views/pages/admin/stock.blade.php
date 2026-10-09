@@ -2,7 +2,7 @@
 @section('title', 'Stock — ChinaBay Admin')
 @section('heading', 'Stock')
 @section('content')
-@php $low = collect(\App\Support\ShopDemo::products())->sortBy('stock')->take(6); @endphp
+@php $low = collect(\App\Support\Catalog::products())->sortBy('stock')->take(6); @endphp
 <div x-data="{ toast: '' }">
     <div class="rounded-lg border border-red-200 bg-red-50 p-4 text-sm"><b class="text-brand">⚠ {{ $low->count() }} products below safety stock (15).</b> Reorder suggested for Robot Vacuum Mini & Air Fryer.</div>
     <div class="card mt-4 overflow-x-auto p-0">

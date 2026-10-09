@@ -3,7 +3,7 @@
 @section('heading', 'Dashboard')
 @section('content')
 @php
-    $products = \App\Support\ShopDemo::products();
+    $products = \App\Support\Catalog::products();
     usort($products, fn($a,$b) => $a['stock'] <=> $b['stock']);
     $low = array_slice($products, 0, 5);
     usort($products, fn($a,$b) => $b['reviews'] <=> $a['reviews']);

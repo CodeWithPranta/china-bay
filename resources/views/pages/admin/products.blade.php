@@ -2,7 +2,7 @@
 @section('title', 'Products — ChinaBay Admin')
 @section('heading', 'Products')
 @section('content')
-@php $products = \App\Support\ShopDemo::products(); $cats = \App\Support\ShopDemo::categories(); @endphp
+@php $products = \App\Support\Catalog::products(); $cats = \App\Support\Catalog::categories(); @endphp
 <div x-data="{ open: false, toast: '' }">
     <div class="card flex flex-col gap-2 sm:flex-row">
         <input class="input sm:max-w-xs" placeholder="🔍 Search products…">

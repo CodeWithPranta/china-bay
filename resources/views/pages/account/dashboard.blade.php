@@ -1,6 +1,6 @@
 @extends('layouts.app')
 @section('title', 'My Account — ChinaBay')
-@php use App\Support\ShopDemo; $recs = array_slice(ShopDemo::products(), 0, 4); $map = collect(ShopDemo::products())->keyBy('id'); @endphp
+@php use App\Support\Catalog; $recs = array_slice(Catalog::products(), 0, 4); $map = collect(Catalog::products())->keyBy('id'); @endphp
 @section('content')
 <div class="flex flex-col gap-4 py-6 lg:flex-row">
     <x-account.sidebar />

@@ -1,6 +1,6 @@
 @extends('layouts.app')
 @section('title', 'Cart – ChinaBay')
-@php use App\Support\ShopDemo; $products = ShopDemo::products(); @endphp
+@php use App\Support\Catalog; $products = Catalog::products(); @endphp
 
 @section('content')
 <nav class="mt-3 text-xs text-slate-500" aria-label="Breadcrumb"><a href="/" class="hover:text-brand">Home</a> / <span class="text-ink font-semibold">Cart · কার্ট</span></nav>

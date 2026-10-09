@@ -1,7 +1,8 @@
 <?php
 
+use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\LocaleController;
-use App\Support\ShopDemo;
+use App\Support\Catalog;
 use Illuminate\Support\Facades\Route;
 
 // Locale switcher (session based, supports LTR + RTL)
@@ -17,14 +18,18 @@ Route::view('/track-order', 'pages.track-order');
 Route::view('/flash-sale', 'pages.flash-sale');
 
 Route::get('/product/{slug}', function (string $slug) {
-    $product = collect(ShopDemo::products())->firstWhere('slug', $slug) ?? ShopDemo::products()[0];
+    $product = Catalog::findBySlug($slug);
+
+    abort_if($product === null, 404);
 
     return view('pages.product', ['product' => $product]);
 });
 
-// Auth (static design preview)
+// Auth (real login; register/verify screens land with customer auth)
 Route::prefix('auth')->group(function () {
-    Route::view('/login', 'pages.auth.login');
+    Route::get('/login', [LoginController::class, 'show'])->name('login');
+    Route::post('/login', [LoginController::class, 'store'])->middleware('throttle:5,1');
+    Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
     Route::view('/register', 'pages.auth.register');
     Route::view('/verify', 'pages.auth.verify');
 });
@@ -53,16 +58,19 @@ Route::view('/returns', 'pages.returns');
 Route::view('/terms', 'pages.terms');
 Route::view('/privacy', 'pages.privacy');
 
-// Admin (static design preview)
-Route::prefix('admin')->group(function () {
-    Route::view('/', 'pages.admin.dashboard');
-    Route::view('/orders', 'pages.admin.orders');
-    Route::view('/orders/{id}', 'pages.admin.order-detail');
-    Route::view('/products', 'pages.admin.products');
-    Route::view('/stock', 'pages.admin.stock');
-    Route::view('/customers', 'pages.admin.customers');
-    Route::view('/coupons', 'pages.admin.coupons');
-    Route::view('/flash-sales', 'pages.admin.flash-sales');
-    Route::view('/reviews', 'pages.admin.reviews');
-    Route::view('/settings', 'pages.admin.settings');
+// Admin (Livewire-powered; static previews remain for catalog/orders until Phase 1)
+Route::prefix('admin')->middleware('auth')->group(function () {
+    Route::view('/', 'pages.admin.dashboard')->middleware('permission:dashboard.view');
+    Route::view('/orders', 'pages.admin.orders')->middleware('permission:orders.view');
+    Route::view('/orders/{id}', 'pages.admin.order-detail')->middleware('permission:orders.view');
+    Route::view('/products', 'pages.admin.products')->middleware('permission:products.view');
+    Route::view('/stock', 'pages.admin.stock')->middleware('permission:stock.manage');
+    Route::view('/customers', 'pages.admin.customers')->middleware('permission:customers.view');
+    Route::view('/coupons', 'pages.admin.coupons')->middleware('permission:coupons.manage');
+    Route::view('/flash-sales', 'pages.admin.flash-sales')->middleware('permission:flash-sales.manage');
+    Route::view('/reviews', 'pages.admin.reviews')->middleware('permission:reviews.moderate');
+    Route::view('/settings', 'pages.admin.settings')->middleware('permission:settings.manage');
+    Route::view('/languages', 'pages.admin.languages')->middleware('permission:languages.manage');
+    Route::view('/roles', 'pages.admin.roles')->middleware('permission:roles.manage');
+    Route::view('/users', 'pages.admin.users')->middleware('permission:users.view');
 });

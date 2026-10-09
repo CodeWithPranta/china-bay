@@ -1,8 +1,8 @@
 @extends('layouts.app')
 @section('title', ($product['name'] ?? 'Product') . ' – ChinaBay')
 @php
-    use App\Support\ShopDemo;
-    $all = ShopDemo::products();
+    use App\Support\Catalog;
+    $all = Catalog::products();
     $p = $product ?? $all[0];
     $related = array_values(array_filter($all, fn($x) => $x['cat'] === $p['cat'] && $x['id'] !== $p['id']));
     $related = array_slice(count($related) ? $related : $all, 0, 4);
@@ -14,14 +14,25 @@
 
 <div class="mt-3 grid gap-6 pb-8 md:grid-cols-2" x-data="{ thumb: 0, qty: 1, tab: 'desc', size: 'M', color: 'Black' }">
     {{-- Gallery --}}
-    @php $thumbs = [$p['emoji'], '📦', '✨', '🔍']; @endphp
+    @php
+        $hasImage = ! empty($p['image']);
+        $thumbs = $hasImage ? ['img', $p['emoji'], '📦', '✨'] : [$p['emoji'], '📦', '✨', '🔍'];
+    @endphp
     <div>
-        <div class="grid h-72 place-items-center rounded-lg border border-slate-100 bg-slate-50 text-[7rem] sm:h-96" aria-label="{{ $p['name'] }}">
-            <span x-text="['{{ $p['emoji'] }}','📦','✨','🔍'][thumb]">{{ $p['emoji'] }}</span>
+        <div class="grid h-72 place-items-center overflow-hidden rounded-lg border border-slate-100 bg-slate-50 sm:h-96" aria-label="{{ $p['name'] }}">
+            @if ($hasImage)
+                <img src="{{ $p['image'] }}" alt="{{ $p['name'] }}" class="h-full w-full object-cover">
+            @else
+                <span x-text="['{{ $p['emoji'] }}','📦','✨','🔍'][thumb]" class="text-[7rem]">{{ $p['emoji'] }}</span>
+            @endif
         </div>
         <div class="mt-2 grid grid-cols-4 gap-2">
             @foreach ($thumbs as $i => $t)
-                <button @click="thumb = {{ $i }}" :class="thumb === {{ $i }} ? 'border-brand ring-2 ring-brand/20' : 'border-slate-200'" class="grid h-16 place-items-center rounded-lg border text-3xl" aria-label="View {{ $i + 1 }}">{{ $t }}</button>
+                @if ($t === 'img')
+                    <button @click="thumb = {{ $i }}" :class="thumb === {{ $i }} ? 'border-brand ring-2 ring-brand/20' : 'border-slate-200'" class="h-16 overflow-hidden rounded-lg border" aria-label="View {{ $i + 1 }}"><img src="{{ $p['image'] }}" alt="" class="h-full w-full object-cover"></button>
+                @else
+                    <button @click="thumb = {{ $i }}" :class="thumb === {{ $i }} ? 'border-brand ring-2 ring-brand/20' : 'border-slate-200'" class="grid h-16 place-items-center rounded-lg border text-3xl" aria-label="View {{ $i + 1 }}">{{ $t }}</button>
+                @endif
             @endforeach
         </div>
     </div>

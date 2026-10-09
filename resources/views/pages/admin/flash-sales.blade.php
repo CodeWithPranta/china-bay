@@ -2,7 +2,7 @@
 @section('title', 'Flash Sales — ChinaBay Admin')
 @section('heading', 'Flash Sales')
 @section('content')
-@php $products = \App\Support\ShopDemo::products(); @endphp
+@php $products = \App\Support\Catalog::products(); @endphp
 <div x-data="{ toast: '', h: 5, m: 42, s: 10 }" x-init="setInterval(() => { if (s > 0) s--; else if (m > 0) { m--; s = 59 } else if (h > 0) { h--; m = 59; s = 59 } }, 1000)" class="grid gap-4 lg:grid-cols-3">
     <div class="space-y-4 lg:col-span-2">
         <div class="card !border-0 bg-navy text-white">

@@ -1,6 +1,6 @@
 @extends('layouts.app')
 @section('title', 'Checkout – ChinaBay')
-@php use App\Support\ShopDemo; $products = ShopDemo::products(); $zones = ShopDemo::deliveryZones(); @endphp
+@php use App\Support\Catalog; use App\Support\ShopDemo; $products = Catalog::products(); $zones = ShopDemo::deliveryZones(); @endphp
 
 @section('content')
 <nav class="mt-3 text-xs text-slate-500" aria-label="Breadcrumb"><a href="/" class="hover:text-brand">Home</a> / <a href="/cart" class="hover:text-brand">Cart</a> / <span class="text-ink font-semibold">Checkout · চেকআউট</span></nav>

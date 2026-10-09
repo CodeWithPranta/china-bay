@@ -1,11 +1,12 @@
 @extends('layouts.app')
 @section('title', 'ChinaBay – Quality Meets Connection')
 @php
+    use App\Support\Catalog;
     use App\Support\ShopDemo;
     $slides = ShopDemo::slides();
-    $cats = ShopDemo::categories();
-    $products = ShopDemo::products();
-    $featured = array_slice($products, 0, 6);
+    $cats = Catalog::categories();
+    $products = Catalog::products();
+    $featured = Catalog::featured(6);
 @endphp
 
 @section('content')
@@ -144,7 +145,7 @@ window.CB_PRODUCTS = @json(collect($products)->mapWithKeys(fn($p) => [$p['id'] =
     const card = (p) => `<article class="relative flex flex-col rounded-lg border border-slate-100 p-3 shadow-sm transition hover:shadow-md">
         <span class="badge-off absolute start-2 top-2">-${p.off}%</span>
         <button data-wish="${p.id}" aria-label="Toggle wishlist" class="absolute end-2 top-1.5 text-xl text-slate-300 hover:text-brand">♡</button>
-        <a href="/product/${p.slug}" class="grid h-28 place-items-center text-6xl">${p.emoji}</a>
+        <a href="/product/${p.slug}" class="grid h-28 place-items-center overflow-hidden">${p.image ? '<img src="' + p.image + '" alt="" loading="lazy" class="h-28 w-full rounded-md object-cover">' : '<span class="text-6xl">' + p.emoji + '</span>'}</a>
         <h3 class="mt-2 text-[11px] font-semibold leading-snug"><a href="/product/${p.slug}" class="hover:text-brand">${p.name}<br><span class="font-normal text-slate-500">${p.sub}</span></a></h3>
         <p class="mt-1 text-[10px] text-slate-400"><s>৳ ${Number(p.old).toLocaleString()}</s> <b class="text-sm text-brand">৳ ${Number(p.price).toLocaleString()}</b></p>
         <p class="text-[10px] text-amber-400">★★★★★ <span class="text-slate-400">(${p.reviews})</span></p>

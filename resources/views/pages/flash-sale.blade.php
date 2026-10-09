@@ -1,6 +1,6 @@
 @extends('layouts.app')
 @section('title', 'Flash Sale – ChinaBay')
-@php use App\Support\ShopDemo; $products = array_slice(ShopDemo::products(), 0, 6); @endphp
+@php use App\Support\Catalog; $products = array_slice(Catalog::products(), 0, 6); @endphp
 
 @section('content')
 {{-- Campaign banner --}}
@@ -57,7 +57,7 @@
 
 @push('scripts')
 <script>
-window.CB_PRODUCTS = @json(collect(ShopDemo::products())->mapWithKeys(fn($p) => [$p['id'] => $p]));
+window.CB_PRODUCTS = @json(collect(Catalog::products())->mapWithKeys(fn($p) => [$p['id'] => $p]));
 function flashTimer() {
     return {
         parts: { hrs: '00', min: '00', sec: '00' },

@@ -1,6 +1,6 @@
 @php
-    use App\Support\ShopDemo;
-    $cats = ShopDemo::categories();
+    use App\Support\Catalog;
+    $cats = Catalog::categories();
 @endphp
 <div id="ovl" class="fixed inset-0 z-40 hidden bg-black/50"></div>
 
@@ -29,11 +29,17 @@
         <p class="mb-2 text-xs font-semibold text-slate-500">{{ __('shop.language') }}</p>
         <div class="flex flex-wrap gap-2">
             @php
+                use App\Models\SiteLocale;
                 $currentLocale = $appLocale ?? app()->getLocale();
-                $localeNames = ['en' => 'English', 'bn' => 'বাংলা', 'ar' => 'العربية'];
+                $drawerLocales = SiteLocale::active();
+                if (empty($drawerLocales)) {
+                    $codes = $availableLocales ?? ['bn'];
+                    $names = ['en' => 'English', 'bn' => 'বাংলা', 'ar' => 'العربية'];
+                    $drawerLocales = array_map(fn ($c) => (object) ['code' => $c, 'native_name' => $names[$c] ?? $c], $codes);
+                }
             @endphp
-            @foreach ($availableLocales ?? ['en'] as $locale)
-                <a href="{{ route('locale.switch', $locale) }}" hreflang="{{ $locale }}" class="rounded-full px-3 py-1.5 text-xs font-semibold {{ $locale === $currentLocale ? 'bg-brand text-white' : 'bg-slate-100 text-ink hover:bg-brand/10 hover:text-brand' }}">{{ $localeNames[$locale] ?? $locale }}</a>
+            @foreach ($drawerLocales as $locale)
+                <a href="{{ route('locale.switch', $locale->code) }}" hreflang="{{ $locale->code }}" class="rounded-full px-3 py-1.5 text-xs font-semibold {{ $locale->code === $currentLocale ? 'bg-brand text-white' : 'bg-slate-100 text-ink hover:bg-brand/10 hover:text-brand' }}">{{ $locale->native_name }}</a>
             @endforeach
         </div>
     </div>

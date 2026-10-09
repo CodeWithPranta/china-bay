@@ -1,6 +1,6 @@
 @extends('layouts.app')
 @section('title', 'Wishlist — ChinaBay')
-@php use App\Support\ShopDemo; $map = collect(ShopDemo::products())->keyBy('id'); @endphp
+@php use App\Support\Catalog; $map = collect(Catalog::products())->keyBy('id'); @endphp
 @section('content')
 <div class="flex flex-col gap-4 py-6 lg:flex-row">
     <x-account.sidebar />
