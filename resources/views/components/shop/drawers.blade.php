@@ -16,7 +16,18 @@
         <a href="/shop" class="border-b border-slate-100 py-3 hover:text-brand">Shop</a>
         <a href="/flash-sale" class="border-b border-slate-100 py-3 hover:text-brand">⚡ Flash Sale</a>
         <a href="/track-order" class="border-b border-slate-100 py-3 hover:text-brand">Track Order</a>
-        <a href="/account" class="border-b border-slate-100 py-3 hover:text-brand">My Account</a>
+        @auth
+            <a href="/account" class="border-b border-slate-100 py-3 hover:text-brand">My Account · {{ auth()->user()->name }}</a>
+            <form method="POST" action="{{ route('logout') }}" class="py-3">
+                @csrf
+                <button class="font-medium text-brand">⏻ Logout</button>
+            </form>
+        @else
+            <div class="grid grid-cols-2 gap-2 py-3">
+                <a href="{{ route('login') }}" class="btn-outline py-2.5 text-center text-xs">Login</a>
+                <a href="{{ route('register') }}" class="btn py-2.5 text-center text-xs">Register</a>
+            </div>
+        @endauth
         <a href="/contact" class="border-b border-slate-100 py-3 hover:text-brand">Contact</a>
     </div>
     <h3 class="mb-2 mt-6 text-xs font-semibold text-slate-500">Categories</h3>
@@ -64,6 +75,8 @@
 
 <script>
 // Drawer renderer uses the static catalogue injected per page via window.CB_PRODUCTS.
+const cbThumb = (p, cls) => window.cbHelpers?.cbImg(p, cls)
+    ?? `<span class="${cls} grid shrink-0 place-items-center rounded-lg bg-slate-50 text-3xl">${p.emoji}</span>`;
 function renderDrawer() {
     const body = document.getElementById('dBody');
     const foot = document.getElementById('dFoot');
@@ -87,7 +100,7 @@ function renderDrawer() {
             if (!p) {
                 return '';
             }
-            return `<div class="flex items-center gap-3 border-b border-slate-100 py-3"><span class="grid size-14 place-items-center rounded-lg bg-slate-50 text-3xl">${p.emoji}</span><div class="flex-1 text-xs"><b class="block">${p.name}</b><span class="font-semibold text-brand">৳ ${Number(p.price).toLocaleString()}</span></div><button data-add="${p.id}" class="btn px-3 py-1.5 text-[11px]">Add</button></div>`;
+            return `<div class="flex items-center gap-3 border-b border-slate-100 py-3">${cbThumb(p, 'size-14')}<div class="flex-1 text-xs"><b class="block">${p.name}</b><span class="font-semibold text-brand">৳ ${Number(p.price).toLocaleString()}</span></div><button data-add="${p.id}" class="btn px-3 py-1.5 text-[11px]">Add</button></div>`;
         }).join('');
         return;
     }
@@ -106,7 +119,7 @@ function renderDrawer() {
             return '';
         }
         sub += p.price * q;
-        return `<div class="flex items-center gap-3 border-b border-slate-100 py-3"><span class="grid size-14 place-items-center rounded-lg bg-slate-50 text-3xl">${p.emoji}</span>
+        return `<div class="flex items-center gap-3 border-b border-slate-100 py-3">${cbThumb(p, 'size-14')}
         <div class="min-w-0 flex-1 text-xs"><b class="block truncate">${p.name}</b><span class="text-brand font-semibold">৳ ${Number(p.price).toLocaleString()}</span>
         <div class="mt-1.5 inline-flex items-center rounded border border-slate-200"><button data-qty="${p.id}" data-d="-1" class="px-2 py-0.5" aria-label="Decrease">−</button><span class="w-6 text-center">${q}</span><button data-qty="${p.id}" data-d="1" class="px-2 py-0.5" aria-label="Increase">+</button></div></div>
         <button data-rm="${p.id}" class="text-slate-400 hover:text-brand" aria-label="Remove">🗑</button></div>`;

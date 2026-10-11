@@ -5,8 +5,11 @@
 <div class="flex flex-col gap-4 py-6 lg:flex-row">
     <x-account.sidebar />
     <div class="min-w-0 flex-1 space-y-4">
+        @if (session('status'))
+            <p class="rounded-lg bg-emerald-50 px-4 py-3 text-xs font-semibold text-emerald-700">{{ session('status') }}</p>
+        @endif
         <div class="card flex flex-wrap items-center justify-between gap-3">
-            <div><h1 class="text-xl font-extrabold">আসসালামু আলাইকুম, Rahim 👋</h1><p class="text-xs text-slate-500">Gold member · 120 points · 3 active orders</p></div>
+            <div><h1 class="text-xl font-extrabold">আসসালামু আলাইকুম, {{ auth()->user()->name }} 👋</h1><p class="text-xs text-slate-500">Gold member · 120 points · 3 active orders</p></div>
             <a href="/shop" class="btn px-4 py-2.5 text-xs">Continue Shopping →</a>
         </div>
         <div class="grid grid-cols-2 gap-3 lg:grid-cols-4">

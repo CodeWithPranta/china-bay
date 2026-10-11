@@ -72,14 +72,14 @@
         <div class="card">
             <h3 class="font-bold">⚠ Low stock ({{ count($low) }})</h3>
             <ul class="mt-2 space-y-2 text-sm">
-                @foreach ($low as $p)<li class="flex items-center gap-2"><span class="text-lg">{{ $p['emoji'] }}</span><span class="min-w-0 flex-1 truncate">{{ $p['name'] }}</span><span class="rounded-full bg-red-100 px-2 py-0.5 text-[11px] font-bold text-brand">{{ $p['stock'] }} left</span></li>@endforeach
+                @foreach ($low as $p)<li class="flex items-center gap-2"><x-shop.product-thumb :product="$p" class="size-9" /><span class="min-w-0 flex-1 truncate">{{ $p['name'] }}</span><span class="rounded-full bg-red-100 px-2 py-0.5 text-[11px] font-bold text-brand">{{ $p['stock'] }} left</span></li>@endforeach
             </ul>
             <a href="/admin/stock" class="mt-2 inline-block text-xs font-bold text-brand">Manage stock →</a>
         </div>
         <div class="card">
             <h3 class="font-bold">★ Best sellers</h3>
             <ul class="mt-2 space-y-2 text-sm">
-                @foreach ($best as $p)<li class="flex items-center gap-2"><span class="text-lg">{{ $p['emoji'] }}</span><span class="min-w-0 flex-1 truncate">{{ $p['name'] }}</span><span class="text-xs text-slate-500">★{{ $p['rating'] }} ({{ $p['reviews'] }})</span></li>@endforeach
+                @foreach ($best as $p)<li class="flex items-center gap-2"><x-shop.product-thumb :product="$p" class="size-9" /><span class="min-w-0 flex-1 truncate">{{ $p['name'] }}</span><span class="text-xs text-slate-500">★{{ $p['rating'] }} ({{ $p['reviews'] }})</span></li>@endforeach
             </ul>
         </div>
     </div>

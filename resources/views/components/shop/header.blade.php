@@ -53,14 +53,37 @@
         <button @click="mobileSearch = !mobileSearch" class="grid size-10 place-items-center rounded-xl bg-slate-100 md:hidden" aria-label="Search">
             <svg class="size-5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
         </button>
-        <a href="/account" class="hidden items-center gap-2 sm:flex">
-            <svg class="size-6 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" /></svg>
-            @auth
-                <span class="hidden xl:block"><b class="block max-w-28 truncate text-[13px]">{{ auth()->user()->name }}</b><span class="text-slate-500">My Account</span></span>
-            @else
-                <span class="hidden xl:block"><b class="block text-[13px]">{{ __('shop.account') }}</b><span class="text-slate-500">{{ __('shop.login_register') }}</span></span>
-            @endauth
-        </a>
+        @auth
+            <div class="relative hidden sm:block" x-data="{ acct: false }" @click.outside="acct = false" @keydown.escape.window="acct = false">
+                <button @click="acct = !acct" class="flex items-center gap-2" aria-haspopup="menu" :aria-expanded="acct">
+                    <svg class="size-6 shrink-0 text-brand" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" /></svg>
+                    <span class="hidden text-start xl:block"><b class="block max-w-28 truncate text-[13px]">{{ auth()->user()->name }}</b><span class="text-slate-500">My Account</span></span>
+                    <svg class="size-3.5 text-slate-400 transition" :class="acct && 'rotate-180'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
+                </button>
+                <div x-show="acct" x-cloak x-transition.opacity.duration.150ms role="menu"
+                    class="absolute end-0 top-full z-40 mt-2 w-52 overflow-hidden rounded-xl border border-slate-100 bg-white py-1.5 text-[13px] font-medium shadow-xl">
+                    <p class="truncate px-4 pb-1.5 pt-2 text-[11px] text-slate-400">{{ auth()->user()->phone ?? auth()->user()->email }}</p>
+                    <a href="/account" role="menuitem" class="block px-4 py-2 hover:bg-slate-50 hover:text-brand">◧ Dashboard</a>
+                    <a href="/account/orders" role="menuitem" class="block px-4 py-2 hover:bg-slate-50 hover:text-brand">📦 My Orders</a>
+                    <a href="/account/wishlist" role="menuitem" class="block px-4 py-2 hover:bg-slate-50 hover:text-brand">♡ Wishlist</a>
+                    <a href="/account/coupons" role="menuitem" class="block px-4 py-2 hover:bg-slate-50 hover:text-brand">🎟 Coupons</a>
+                    @if (auth()->user()->hasAnyRole(['super-admin', 'admin', 'manager', 'support']))
+                        <a href="/admin" role="menuitem" class="block px-4 py-2 text-brand hover:bg-brand/5">⚙ Admin Panel</a>
+                    @endif
+                    <div class="mt-1.5 border-t border-slate-100 pt-1.5">
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <button role="menuitem" class="block w-full px-4 py-2 text-start text-brand hover:bg-red-50">⏻ Logout</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        @else
+            <div class="hidden items-center gap-2 sm:flex">
+                <svg class="size-6 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" /></svg>
+                <span class="hidden xl:block"><b class="block text-[13px]"><a href="{{ route('login') }}" class="hover:text-brand">Login</a> <span class="font-normal text-slate-300">/</span> <a href="{{ route('register') }}" class="hover:text-brand">Register</a></b><span class="text-slate-500">My Account</span></span>
+            </div>
+        @endauth
         <button data-act="wishlist" class="relative flex items-center gap-2 text-brand" aria-label="Wishlist">
             <svg class="size-6 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" /></svg>
             <span id="wCount" class="absolute -end-2 -top-1 grid size-4 place-items-center rounded-full bg-brand text-[9px] text-white sm:end-auto sm:start-4">0</span>

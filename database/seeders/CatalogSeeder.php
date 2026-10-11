@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Category;
 use App\Models\Product;
+use App\Models\ProductMedia;
 use App\Support\ShopDemo;
 use Illuminate\Database\Seeder;
 
@@ -33,7 +34,7 @@ class CatalogSeeder extends Seeder
         $featured = array_slice(array_column(ShopDemo::products(), 'id'), 0, 6);
 
         foreach (ShopDemo::products() as $p) {
-            Product::updateOrCreate(
+            $product = Product::updateOrCreate(
                 ['sku' => 'CB-'.$p['id']],
                 [
                     'category_id' => $catIds[$p['cat']] ?? reset($catIds),
@@ -48,6 +49,15 @@ class CatalogSeeder extends Seeder
                     'is_featured' => in_array($p['id'], $featured, true),
                     'rating_avg' => $p['rating'],
                     'reviews_count' => $p['reviews'],
+                ]
+            );
+
+            ProductMedia::updateOrCreate(
+                ['product_id' => $product->id, 'sort_order' => 0],
+                [
+                    'type' => 'image',
+                    'url' => $p['image'],
+                    'is_primary' => true,
                 ]
             );
         }

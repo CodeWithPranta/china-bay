@@ -48,6 +48,8 @@ window.CB_PRODUCTS = @json(collect($products)->mapWithKeys(fn($p) => [$p['id'] =
     const rows = document.getElementById('cartRows');
     const empty = document.getElementById('cartEmpty');
     const tk = (n) => '৳ ' + Number(n).toLocaleString();
+    const thumb = (p, cls) => window.cbHelpers?.cbImg(p, cls)
+        ?? `<span class="${cls} grid shrink-0 place-items-center rounded-lg bg-slate-50 text-4xl">${p.emoji}</span>`;
     function couponVal(sub) {
         const c = (JSON.parse(localStorage.getItem('cb_coupon') || 'null'));
         if (c === 'CHINABAY10') { return Math.round(sub * 0.10); }
@@ -60,7 +62,7 @@ window.CB_PRODUCTS = @json(collect($products)->mapWithKeys(fn($p) => [$p['id'] =
         rows.innerHTML = ids.map((id) => {
             const p = window.CB_PRODUCTS[id], q = cart[id];
             return `<div class="card flex items-center gap-3 !p-3">
-                <span class="grid size-16 place-items-center rounded-lg bg-slate-50 text-4xl">${p.emoji}</span>
+                ${thumb(p, 'size-16')}
                 <div class="min-w-0 flex-1 text-xs"><b class="block truncate text-sm">${p.name}</b>
                 <span class="text-brand font-bold">${tk(p.price)}</span>
                 <div class="mt-1.5 inline-flex items-center rounded border border-slate-200">

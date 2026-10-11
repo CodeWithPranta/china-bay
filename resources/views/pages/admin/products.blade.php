@@ -15,7 +15,7 @@
             <tbody>
             @foreach ($products as $p)
                 <tr class="border-t border-slate-100 hover:bg-slate-50/60">
-                    <td class="px-4 py-2.5"><span class="text-xl">{{ $p['emoji'] }}</span> <b>{{ $p['name'] }}</b><span class="block pl-8 text-[11px] text-slate-500">{{ $p['sub'] }}</span></td>
+                    <td class="px-4 py-2.5"><span class="flex items-center gap-2"><x-shop.product-thumb :product="$p" class="size-10" /> <span><b>{{ $p['name'] }}</b><span class="block text-[11px] text-slate-500">{{ $p['sub'] }}</span></span></span></td>
                     <td class="px-2 py-2.5 text-xs">{{ $p['cat'] }}</td>
                     <td class="px-2 py-2.5 font-bold">৳{{ number_format($p['price']) }} <span class="text-[11px] font-normal text-slate-400 line-through">৳{{ number_format($p['old']) }}</span></td>
                     <td class="px-2 py-2.5"><span class="rounded-full px-2 py-0.5 text-[11px] font-bold {{ $p['stock'] < 15 ? 'bg-red-100 text-brand' : 'bg-emerald-100 text-emerald-700' }}">{{ $p['stock'] }}</span></td>

@@ -168,13 +168,14 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
-// Voice typing (Web Speech API) for manual search + AI assistant inputs.
-// Dictation language follows <html lang>: bn -> bn-BD, ar -> ar-SA.
-const SpeechAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
-let voiceRec = null;
-let voiceBtn = null;
-
+// Voice typing (Web Speech API) for search, checkout fields + AI inputs.
+// Dictation language: explicit user choice (localStorage cb_voice_lang,
+// 'bn-BD' | 'en-US') wins, else follows <html lang>: bn -> bn-BD.
 function voiceLang() {
+    const saved = localStorage.getItem('cb_voice_lang');
+    if (saved === 'bn-BD' || saved === 'en-US') {
+        return saved;
+    }
     const l = (document.documentElement.lang || 'en').toLowerCase();
     if (l.startsWith('bn')) {
         return 'bn-BD';
@@ -183,6 +184,15 @@ function voiceLang() {
         return 'ar-SA';
     }
     return 'en-US';
+}
+
+const SpeechAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
+let voiceRec = null;
+let voiceBtn = null;
+
+function setVoiceLang(lang) {
+    localStorage.setItem('cb_voice_lang', lang);
+    document.dispatchEvent(new CustomEvent('chinabay:voice-lang', { detail: lang }));
 }
 
 function stopVoice() {
@@ -197,18 +207,27 @@ function stopVoice() {
 }
 
 function startVoice(btn) {
-    const input = btn.closest('form')?.querySelector('input[type="search"], input[type="text"]');
+    // Explicit per-field target (checkout mic buttons) wins; otherwise fall
+    // back to the first text input of the enclosing form (header search).
+    const input = btn.dataset.voiceFor
+        ? document.getElementById(btn.dataset.voiceFor)
+        : btn.closest('form')?.querySelector('input[type="search"], input[type="text"], input:not([type])');
     if (!input) {
         return;
     }
     if (!SpeechAPI) {
-        toast('Voice search is not supported in this browser');
+        toast('Voice typing is not supported in this browser');
         return;
     }
     if (voiceRec) {
+        const wasMine = voiceBtn === btn;
         stopVoice();
-        return;
+        if (wasMine) {
+            return;
+        }
     }
+    const append = btn.dataset.voiceMode === 'append';
+    const base = append ? input.value.trim() : '';
     const rec = new SpeechAPI();
     rec.lang = voiceLang();
     rec.interimResults = true;
@@ -222,7 +241,7 @@ function startVoice(btn) {
         for (const r of e.results) {
             text += r[0].transcript;
         }
-        input.value = text;
+        input.value = append && base ? base + ' ' + text.trim() : text;
         input.dispatchEvent(new Event('input', { bubbles: true }));
     };
     rec.onend = () => stopVoice();
@@ -230,6 +249,8 @@ function startVoice(btn) {
         stopVoice();
         if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
             toast('Microphone blocked — allow access and try again');
+        } else if (e.error === 'no-speech') {
+            toast('Did not hear anything — try again');
         }
     };
     try {
@@ -251,6 +272,16 @@ if (!SpeechAPI) {
     document.querySelectorAll('[data-voice]').forEach((b) => b.classList.add('hidden'));
 }
 
+// Product thumbnail with emoji fallback. Single pattern for every
+// client-rendered spot (drawer, cart, checkout, wishlist, AI search).
+function cbImg(p, cls) {
+    const safe = String(p.name || '').replace(/"/g, '&quot;');
+    if (p.image) {
+        return `<img src="${p.image}" alt="${safe}" loading="lazy" class="${cls} shrink-0 rounded-lg bg-slate-50 object-cover">`;
+    }
+    return `<span class="${cls} grid shrink-0 place-items-center rounded-lg bg-slate-50 text-4xl">${p.emoji || ''}</span>`;
+}
+
 // Expose for page-level scripts (home slider, product gallery, checkout calc).
-window.cbHelpers = { $, $$, tk, toast, panel, closeAll, openDrawer, bump };
+window.cbHelpers = { $, $$, tk, toast, panel, closeAll, openDrawer, bump, voiceLang, setVoiceLang, cbImg };
 window.addEventListener('DOMContentLoaded', () => window.ChinaBay.sync());

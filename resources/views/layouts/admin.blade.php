@@ -13,7 +13,7 @@
     @else
         <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     @endif
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    {{-- Alpine.js ships inside Livewire (force-injected). No second copy. --}}
     {{-- Admin-editable theme (Settings > Theme). --}}
     <style>:root {
         --color-brand: {{ \App\Models\Setting::get('theme.brand', '#c8102e') }};

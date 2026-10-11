@@ -72,8 +72,9 @@ function cbAiAssistant() {
     }
 
     function card(p) {
+        const thumb = window.cbHelpers?.cbImg(p, 'size-11') ?? `<span class="grid size-11 shrink-0 place-items-center rounded-lg bg-white text-2xl">${p.emoji}</span>`;
         return `<div class="mt-2 flex items-center gap-2.5 rounded-xl border border-slate-100 bg-slate-50/60 p-2 text-start">`
-            + `<span class="grid size-11 shrink-0 place-items-center rounded-lg bg-white text-2xl">${p.emoji}</span>`
+            + thumb
             + `<span class="min-w-0 flex-1"><b class="block truncate text-xs">${esc(p.name)}</b>`
             + `<span class="block text-[11px] font-bold text-brand">${tk(p.price)} <s class="font-normal text-slate-400">${tk(p.old)}</s></span></span>`
             + `<a href="/product/${p.slug}" class="shrink-0 rounded-md bg-brand px-2.5 py-1.5 text-[11px] font-bold text-white">View</a>`

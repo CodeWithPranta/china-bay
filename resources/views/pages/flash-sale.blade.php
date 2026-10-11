@@ -35,7 +35,13 @@
                 <div class="relative">
                     <span class="badge-off absolute start-0 top-0">-{{ $p['off'] }}%</span>
                     <button data-wish="{{ $p['id'] }}" aria-label="Toggle wishlist" class="absolute end-0 top-0 text-xl text-slate-300 transition hover:scale-110 hover:text-brand">♡</button>
-                    <a href="/product/{{ $p['slug'] }}" class="grid h-28 place-items-center text-6xl" aria-label="{{ $p['name'] }}">{{ $p['emoji'] }}</a>
+                    <a href="/product/{{ $p['slug'] }}" class="grid h-28 place-items-center overflow-hidden" aria-label="{{ $p['name'] }}">
+                        @if (! empty($p['image']))
+                            <img src="{{ $p['image'] }}" alt="{{ $p['name'] }}" loading="lazy" class="h-28 w-full rounded-md object-cover">
+                        @else
+                            <span class="text-6xl" aria-hidden="true">{{ $p['emoji'] }}</span>
+                        @endif
+                    </a>
                 </div>
                 <h3 class="mt-2 min-h-8 text-[11px] font-semibold leading-snug">
                     <a href="/product/{{ $p['slug'] }}" class="hover:text-brand">{{ $p['name'] }}<br><span class="font-normal text-slate-500">{{ $p['sub'] }}</span></a>

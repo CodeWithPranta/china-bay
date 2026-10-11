@@ -55,6 +55,7 @@ class ShopDemo
             'price' => $r[4], 'old' => $r[5], 'emoji' => $r[6], 'cat' => $r[7],
             'rating' => $r[8], 'reviews' => $r[9], 'stock' => $r[10],
             'off' => (int) round((1 - $r[4] / $r[5]) * 100),
+            'image' => '/images/products/'.$r[1].'.svg',
         ], $rows);
     }
 

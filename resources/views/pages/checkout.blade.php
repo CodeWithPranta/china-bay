@@ -9,13 +9,32 @@
 <div class="mt-4 grid gap-5 pb-10 lg:grid-cols-[1fr_360px]" x-data="checkoutForm()">
     {{-- Left form --}}
     <form action="/order-success" method="GET" class="card space-y-4" @submit="if (!agree) { $event.preventDefault(); alert('Please accept terms & conditions.'); }">
+        <x-shop.voice-lang-toggle />
         <div>
             <b class="text-sm">Contact Info · যোগাযোগ</b>
             <div class="mt-2 grid gap-3 sm:grid-cols-2">
-                <div><label class="label" for="coName">Full name · নাম *</label><input id="coName" required class="input" placeholder="e.g. Rahim Uddin"></div>
-                <div><label class="label" for="coPhone">Phone · মোবাইল *</label><input id="coPhone" required pattern="01[0-9]{9}" class="input" placeholder="01XXXXXXXXX"></div>
+                <div>
+                    <label class="label" for="coName">Full name · নাম *</label>
+                    <div class="relative">
+                        <input id="coName" required class="input pe-10" placeholder="e.g. Rahim Uddin — or tap 🎤 & speak">
+                        <span class="absolute end-1 top-1/2 -translate-y-1/2"><x-shop.voice-mic for="coName" /></span>
+                    </div>
+                </div>
+                <div>
+                    <label class="label" for="coPhone">Phone · মোবাইল *</label>
+                    <div class="relative">
+                        <input id="coPhone" required pattern="01[0-9]{9}" class="input pe-10" placeholder="01XXXXXXXXX — or tap 🎤 & speak">
+                        <span class="absolute end-1 top-1/2 -translate-y-1/2"><x-shop.voice-mic for="coPhone" /></span>
+                    </div>
+                </div>
             </div>
-            <div class="mt-3"><label class="label" for="coAddr">Full address · ঠিকানা *</label><textarea id="coAddr" required rows="2" class="input" placeholder="House, road, area..."></textarea></div>
+            <div class="mt-3">
+                <label class="label" for="coAddr">Full address · ঠিকানা *</label>
+                <div class="relative">
+                    <textarea id="coAddr" required rows="2" class="input pe-10" placeholder="House, road, area... — or tap 🎤 & speak"></textarea>
+                    <span class="absolute end-1 top-2"><x-shop.voice-mic for="coAddr" mode="append" /></span>
+                </div>
+            </div>
             <div class="mt-3 grid gap-3 sm:grid-cols-2">
                 <div><label class="label" for="district">District · জেলা *</label>
                     <select id="district" x-model="district" required class="input">
@@ -46,7 +65,13 @@
             <div x-show="pay === 'nagad'" x-cloak class="mt-2 rounded-md bg-amber-50 p-3 text-[11px]">নগদে পেমেন্ট: <b>017XXXXXXX (Send Money)</b> — TrxID অর্ডার নোটে লিখুন। Demo only.</div>
             <div x-show="pay === 'card'" x-cloak class="mt-2 rounded-md bg-sky-50 p-3 text-[11px]">Card payment via SSLCommerz on order confirm (demo — no charge now).</div>
         </div>
-        <div><label class="label" for="notes">Order notes (optional)</label><textarea id="notes" rows="2" class="input" placeholder="e.g. Call before delivery..."></textarea></div>
+        <div>
+            <label class="label" for="notes">Order notes (optional)</label>
+            <div class="relative">
+                <textarea id="notes" rows="2" class="input pe-10" placeholder="e.g. Call before delivery... — or tap 🎤 & speak"></textarea>
+                <span class="absolute end-1 top-2"><x-shop.voice-mic for="notes" mode="append" /></span>
+            </div>
+        </div>
         <label class="flex items-center gap-2 text-xs"><input type="checkbox" x-model="agree" class="accent-[#c8102e]"> I agree to <a href="/terms" class="text-brand underline">terms & conditions</a> · শর্তাবলীতে সম্মত আছি</label>
         <button class="btn w-full py-3 text-sm">Place Order · অর্ডার কনফার্ম করুন →</button>
     </form>
@@ -56,8 +81,11 @@
         <b>Order Summary · সামারি</b>
         <div id="coItems" class="max-h-64 space-y-2 overflow-y-auto text-xs"></div>
         <div class="flex gap-2">
-            <input id="coCoupon" placeholder="Promo code" class="input !py-2 text-xs" aria-label="Promo code">
-            <button type="button" id="coApply" class="btn-outline px-3 py-2 text-xs">Apply</button>
+            <div class="relative min-w-0 flex-1">
+                <input id="coCoupon" placeholder="Promo code — type or tap 🎤" class="input pe-10 !py-2 text-xs" aria-label="Promo code">
+                <span class="absolute end-1 top-1/2 -translate-y-1/2"><x-shop.voice-mic for="coCoupon" title="Voice promo code" /></span>
+            </div>
+            <button type="button" id="coApply" class="btn-outline shrink-0 px-3 py-2 text-xs">Apply</button>
         </div>
         <p id="coCouponMsg" class="text-[11px] text-slate-500"></p>
         <div class="space-y-1.5 border-t border-slate-100 pt-3 text-xs">
@@ -88,6 +116,8 @@ function checkoutForm() {
 }
 (function () {
     const tk = (n) => '৳ ' + Number(n).toLocaleString();
+    const thumb = (p, cls) => window.cbHelpers?.cbImg(p, cls)
+        ?? `<span class="${cls} grid shrink-0 place-items-center rounded bg-slate-50 text-2xl">${p.emoji}</span>`;
     function couponVal(sub) {
         const c = JSON.parse(localStorage.getItem('cb_coupon') || 'null');
         if (c === 'CHINABAY10') { return Math.round(sub * 0.10); }
@@ -98,7 +128,7 @@ function checkoutForm() {
         const cart = window.ChinaBay?.cart || {};
         const ids = Object.keys(cart).filter((id) => window.CB_PRODUCTS[id]);
         document.getElementById('coItems').innerHTML = ids.length
-            ? ids.map((id) => { const p = window.CB_PRODUCTS[id]; return `<div class="flex items-center gap-2"><span class="grid size-10 place-items-center rounded bg-slate-50 text-2xl">${p.emoji}</span><span class="flex-1 truncate">${p.name} × ${cart[id]}</span><b>${tk(p.price * cart[id])}</b></div>`; }).join('')
+            ? ids.map((id) => { const p = window.CB_PRODUCTS[id]; return `<div class="flex items-center gap-2">${thumb(p, 'size-10')}<span class="flex-1 truncate">${p.name} × ${cart[id]}</span><b>${tk(p.price * cart[id])}</b></div>`; }).join('')
             : '<p class="text-slate-400">Cart is empty — <a href="/shop" class="text-brand underline">add products</a>.</p>';
         const sub = ids.reduce((a, id) => a + window.CB_PRODUCTS[id].price * cart[id], 0);
         const disc = couponVal(sub);

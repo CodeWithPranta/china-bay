@@ -44,6 +44,8 @@ new class extends Component
 
     public function updatedCats(): void
     {
+        // Keep the pill highlight in sync with the checkbox group.
+        $this->cat = count($this->cats) === 1 ? $this->cats[0] : 'all';
         $this->resetPage();
     }
 
@@ -81,7 +83,7 @@ new class extends Component
 
     public function clearAll(): void
     {
-        $this->reset(['cat', 'cats', 'price', 'sort']);
+        $this->reset(['cat', 'cats', 'price', 'sort', 'q']);
         $this->rating = 0;
         $this->inStock = false;
         $this->resetPage();

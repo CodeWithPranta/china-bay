@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\LocaleController;
 use App\Support\Catalog;
 use Illuminate\Support\Facades\Route;
@@ -25,19 +26,20 @@ Route::get('/product/{slug}', function (string $slug) {
     return view('pages.product', ['product' => $product]);
 });
 
-// Auth (real login; register/verify screens land with customer auth)
+// Auth (customers + admins; login/register are guest-only)
 Route::prefix('auth')->group(function () {
-    Route::get('/login', [LoginController::class, 'show'])->name('login');
-    Route::post('/login', [LoginController::class, 'store'])->middleware('throttle:5,1');
+    Route::get('/login', [LoginController::class, 'show'])->name('login')->middleware('guest');
+    Route::post('/login', [LoginController::class, 'store'])->middleware(['guest', 'throttle:5,1']);
     Route::post('/logout', [LoginController::class, 'destroy'])->name('logout');
-    Route::view('/register', 'pages.auth.register');
+    Route::get('/register', [RegisterController::class, 'show'])->name('register')->middleware('guest');
+    Route::post('/register', [RegisterController::class, 'store'])->middleware(['guest', 'throttle:5,1']);
     Route::view('/verify', 'pages.auth.verify');
 });
 Route::redirect('/login', '/auth/login');
 Route::redirect('/register', '/auth/register');
 
-// Customer account (static design preview)
-Route::prefix('account')->group(function () {
+// Customer account (login required — guests bounce to /auth/login)
+Route::prefix('account')->middleware('auth')->group(function () {
     Route::view('/', 'pages.account.dashboard');
     Route::view('/orders', 'pages.account.orders');
     Route::view('/orders/{id}', 'pages.account.order-detail');

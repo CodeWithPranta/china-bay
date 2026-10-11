@@ -15,6 +15,8 @@
 window.CB_PRODUCTS = @json($map);
 (function () {
     const grid = document.getElementById('wishGrid'), empty = document.getElementById('wishEmpty'), n = document.getElementById('wN');
+    const thumb = (p, cls) => window.cbHelpers?.cbImg(p, cls)
+        ?? `<span class="${cls} grid shrink-0 place-items-center rounded-lg bg-slate-50 text-5xl">${p.emoji}</span>`;
     function render() {
         const wish = window.ChinaBay?.wish || [];
         n.textContent = wish.length ? `(${wish.length})` : '';
@@ -22,7 +24,7 @@ window.CB_PRODUCTS = @json($map);
         grid.innerHTML = wish.map((id) => {
             const p = window.CB_PRODUCTS[id];
             if (!p) return '';
-            return `<article class="card !p-3 text-xs"><span class="grid h-20 place-items-center text-5xl">${p.emoji}</span><b class="mt-2 block truncate">${p.name}</b><p class="text-brand font-bold">৳ ${Number(p.price).toLocaleString()}</p><div class="mt-2 flex gap-1.5"><button data-add="${p.id}" class="btn flex-1 py-1.5 text-[11px]">🛒 Move to Cart</button><button data-wish="${p.id}" class="btn-outline px-2.5 py-1.5">♥</button></div></article>`;
+            return `<article class="card !p-3 text-xs">${thumb(p, 'h-20 w-full')}<b class="mt-2 block truncate">${p.name}</b><p class="text-brand font-bold">৳ ${Number(p.price).toLocaleString()}</p><div class="mt-2 flex gap-1.5"><button data-add="${p.id}" class="btn flex-1 py-1.5 text-[11px]">🛒 Move to Cart</button><button data-wish="${p.id}" class="btn-outline px-2.5 py-1.5">♥</button></div></article>`;
         }).join('');
     }
     document.addEventListener('chinabay:sync', render);

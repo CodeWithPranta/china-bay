@@ -13,10 +13,10 @@
 @endphp
 <aside class="card h-fit shrink-0 p-2 text-sm lg:w-60">
     <div class="flex items-center gap-3 rounded-lg bg-slate-50 p-3">
-        <span class="grid size-11 place-items-center rounded-full bg-brand text-lg font-bold text-white">R</span>
+        <span class="grid size-11 shrink-0 place-items-center rounded-full bg-brand text-lg font-bold text-white">{{ mb_substr(auth()->user()->name ?? 'C', 0, 1) }}</span>
         <div class="min-w-0">
-            <b class="block truncate text-[13px]">Rahim Uddin</b>
-            <span class="text-[11px] text-slate-500">01600 000000 · 120 pts</span>
+            <b class="block truncate text-[13px]">{{ auth()->user()->name }}</b>
+            <span class="block truncate text-[11px] text-slate-500">{{ auth()->user()->phone ?? auth()->user()->email }} · {{ auth()->user()->loyalty_points ?? 0 }} pts</span>
         </div>
     </div>
     <nav class="mt-2 flex flex-row gap-1 overflow-x-auto lg:flex-col">

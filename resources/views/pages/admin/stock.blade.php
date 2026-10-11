@@ -11,7 +11,7 @@
             <tbody x-data>
             @foreach ($low as $p)
                 <tr class="border-t border-slate-100" x-data="{ q: {{ $p['stock'] }} }">
-                    <td class="px-4 py-2.5"><span class="text-xl">{{ $p['emoji'] }}</span> <b>{{ $p['name'] }}</b></td>
+                    <td class="px-4 py-2.5"><span class="flex items-center gap-2"><x-shop.product-thumb :product="$p" class="size-10" /> <b>{{ $p['name'] }}</b></span></td>
                     <td class="px-2 py-2.5 text-xs">Standard / Black</td>
                     <td class="px-2 py-2.5"><span class="rounded-full bg-red-100 px-2 py-0.5 text-[11px] font-bold text-brand" x-text="q"></span></td>
                     <td class="px-2 py-2.5"><div class="flex items-center gap-1"><button @click="q > 0 && q--" class="btn-outline size-7">−</button><input x-model="q" type="number" class="input w-16 !px-2 text-center"><button @click="q++" class="btn-outline size-7">+</button></div></td>

@@ -15,8 +15,9 @@
     @else
         <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     @endif
-    {{-- Alpine.js: pairs with Livewire (auto-injected assets) for admin DB work. --}}
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    {{-- Alpine.js ships inside Livewire (force-injected on every page via
+        ForceLivewireAssets middleware). Do NOT add a second Alpine copy —
+        duplicate instances break Livewire filters and x-data islands. --}}
     {{-- Admin-editable theme (Settings > Theme) overrides compiled defaults. --}}
     @php
         $theme = [

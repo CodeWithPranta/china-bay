@@ -17,6 +17,14 @@ test('shop page renders livewire catalog grid', function () {
     $response->assertSee('TWS Wireless Earbuds', false);
 });
 
+test('product cards show images instead of icon placeholders', function () {
+    $response = $this->get('/shop');
+
+    $response->assertStatus(200);
+    $response->assertSee('/images/products/tws-wireless-earbuds.svg', false);
+    $response->assertSee('<img', false);
+});
+
 test('shop grid filters by category via livewire', function () {
     $component = Livewire\Livewire::test('shop.catalog-grid');
 

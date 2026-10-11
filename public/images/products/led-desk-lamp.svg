@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="800" viewBox="0 0 800 800">
+<defs><linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fef9c3"/><stop offset="1" stop-color="#ffffff"/></linearGradient></defs>
+<rect width="800" height="800" fill="url(#bg)"/>
+<circle cx="125" cy="145" r="70" fill="#ffffff" opacity="0.6"/>
+<circle cx="680" cy="175" r="46" fill="#ffffff" opacity="0.55"/>
+<circle cx="650" cy="608" r="90" fill="#ffffff" opacity="0.4"/>
+<ellipse cx="400" cy="588" rx="190" ry="25" fill="#1b2233" opacity="0.08"/>
+<rect x="258" y="518" width="144" height="32" rx="14" fill="#1b2233"/>
+<ellipse cx="330" cy="552" rx="92" ry="20" fill="#1b2233"/>
+<path d="M332 522 L418 378" stroke="#1b2233" stroke-width="19" stroke-linecap="round"/>
+<path d="M418 378 L522 398" stroke="#1b2233" stroke-width="19" stroke-linecap="round"/>
+<circle cx="418" cy="378" r="17" fill="#c8102e" stroke="#ffffff" stroke-width="6"/>
+<path d="M500 356 L592 326 L602 430 L510 442 Z" fill="#1b2233"/>
+<circle cx="562" cy="392" r="15" fill="#c8102e"/>
+<line x1="616" y1="350" x2="650" y2="330" stroke="#c8102e" stroke-width="9" stroke-linecap="round"/>
+<line x1="622" y1="392" x2="660" y2="388" stroke="#c8102e" stroke-width="9" stroke-linecap="round"/>
+<line x1="616" y1="432" x2="648" y2="450" stroke="#c8102e" stroke-width="9" stroke-linecap="round"/>
+<text x="400" y="740" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="28" fill="#94a3b8">ChinaBay</text>
+</svg>

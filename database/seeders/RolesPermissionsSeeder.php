@@ -63,5 +63,9 @@ class RolesPermissionsSeeder extends Seeder
                 'dashboard.view', 'orders.view', 'returns.manage',
                 'reviews.moderate', 'customers.view', 'activity.view',
             ]);
+
+        // Storefront customers — no admin permissions.
+        Role::firstOrCreate(['name' => 'customer', 'guard_name' => 'web'])
+            ->syncPermissions([]);
     }
 }

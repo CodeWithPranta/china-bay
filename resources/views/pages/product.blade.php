@@ -19,12 +19,14 @@
         $thumbs = $hasImage ? ['img', $p['emoji'], '📦', '✨'] : [$p['emoji'], '📦', '✨', '🔍'];
     @endphp
     <div>
-        <div class="grid h-72 place-items-center overflow-hidden rounded-lg border border-slate-100 bg-slate-50 sm:h-96" aria-label="{{ $p['name'] }}">
-            @if ($hasImage)
-                <img src="{{ $p['image'] }}" alt="{{ $p['name'] }}" class="h-full w-full object-cover">
-            @else
-                <span x-text="['{{ $p['emoji'] }}','📦','✨','🔍'][thumb]" class="text-[7rem]">{{ $p['emoji'] }}</span>
-            @endif
+        <div class="grid h-72 place-items-center overflow-hidden rounded-lg border border-slate-100 bg-slate-50 sm:h-96 [&>*]:col-start-1 [&>*]:row-start-1" aria-label="{{ $p['name'] }}" aria-live="polite">
+            @foreach ($thumbs as $i => $t)
+                @if ($t === 'img')
+                    <img x-show="thumb === {{ $i }}" @if ($i > 0) x-cloak @endif src="{{ $p['image'] }}" alt="{{ $p['name'] }} — view {{ $i + 1 }}" class="h-full w-full object-cover">
+                @else
+                    <span x-show="thumb === {{ $i }}" @if ($i > 0) x-cloak @endif class="text-[7rem]">{{ $t }}</span>
+                @endif
+            @endforeach
         </div>
         <div class="mt-2 grid grid-cols-4 gap-2">
             @foreach ($thumbs as $i => $t)
