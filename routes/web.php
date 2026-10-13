@@ -1,9 +1,12 @@
 <?php
 
+use App\Http\Controllers\Account\OrderController;
 use App\Http\Controllers\AiChatController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\LocaleController;
+use App\Http\Controllers\TrackOrderController;
 use App\Support\Catalog;
 use Illuminate\Support\Facades\Route;
 
@@ -18,8 +21,9 @@ Route::view('/', 'pages.home');
 Route::view('/shop', 'pages.shop');
 Route::view('/cart', 'pages.cart');
 Route::view('/checkout', 'pages.checkout');
-Route::view('/order-success', 'pages.order-success');
-Route::view('/track-order', 'pages.track-order');
+Route::post('/checkout', [CheckoutController::class, 'store'])->name('checkout.store')->middleware('throttle:10,1');
+Route::get('/order-success', [CheckoutController::class, 'success'])->name('order.success');
+Route::get('/track-order', [TrackOrderController::class, 'show'])->name('track');
 Route::view('/flash-sale', 'pages.flash-sale');
 
 Route::get('/product/{slug}', function (string $slug) {
@@ -45,8 +49,9 @@ Route::redirect('/register', '/auth/register');
 // Customer account (login required — guests bounce to /auth/login)
 Route::prefix('account')->middleware('auth')->group(function () {
     Route::view('/', 'pages.account.dashboard');
-    Route::view('/orders', 'pages.account.orders');
-    Route::view('/orders/{id}', 'pages.account.order-detail');
+    Route::get('/orders', [OrderController::class, 'index'])->name('account.orders');
+    Route::get('/orders/{code}', [OrderController::class, 'show'])->name('account.orders.show');
+    Route::post('/orders/{code}/cancel', [OrderController::class, 'cancel'])->name('account.orders.cancel');
     Route::view('/addresses', 'pages.account.addresses');
     Route::view('/wishlist', 'pages.account.wishlist');
     Route::view('/reviews', 'pages.account.reviews');
@@ -68,7 +73,7 @@ Route::view('/privacy', 'pages.privacy');
 Route::prefix('admin')->middleware('auth')->group(function () {
     Route::view('/', 'pages.admin.dashboard')->middleware('permission:dashboard.view');
     Route::view('/orders', 'pages.admin.orders')->middleware('permission:orders.view');
-    Route::view('/orders/{id}', 'pages.admin.order-detail')->middleware('permission:orders.view');
+    Route::get('/orders/{code}', fn (string $code) => view('pages.admin.order-detail', ['code' => $code]))->middleware('permission:orders.view');
     Route::view('/products', 'pages.admin.products')->middleware('permission:products.view');
     Route::view('/pos', 'pages.admin.pos')->middleware('permission:pos.view');
     Route::view('/categories', 'pages.admin.categories')->middleware('permission:categories.manage');

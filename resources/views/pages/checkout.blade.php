@@ -8,7 +8,14 @@
 
 <div class="mt-4 grid gap-5 pb-10 lg:grid-cols-[1fr_360px]" x-data="checkoutForm()">
     {{-- Left form --}}
-    <form action="/order-success" method="GET" class="card space-y-4" @submit="if (!agree) { $event.preventDefault(); alert('Please accept terms & conditions.'); }">
+    <form action="{{ route('checkout.store') }}" method="POST" id="coForm" class="card space-y-4" @submit="if (!agree) { $event.preventDefault(); alert('Please accept terms & conditions.'); }">
+        @csrf
+        <input type="hidden" name="items" id="coItemsInput" value="[]">
+        @if ($errors->any())
+            <div class="rounded-md bg-red-50 p-3 text-xs font-semibold text-brand">
+                @foreach ($errors->all() as $error)<p>{{ $error }}</p>@endforeach
+            </div>
+        @endif
         <x-shop.voice-lang-toggle />
         <div>
             <b class="text-sm">Contact Info · যোগাযোগ</b>
@@ -16,14 +23,14 @@
                 <div>
                     <label class="label" for="coName">Full name · নাম *</label>
                     <div class="relative">
-                        <input id="coName" required class="input pe-10" placeholder="e.g. Rahim Uddin — or tap 🎤 & speak">
+                        <input id="coName" name="name" value="{{ old('name', auth()->user()?->name) }}" required class="input pe-10" placeholder="e.g. Rahim Uddin — or tap 🎤 & speak">
                         <span class="absolute end-1 top-1/2 -translate-y-1/2"><x-shop.voice-mic for="coName" /></span>
                     </div>
                 </div>
                 <div>
                     <label class="label" for="coPhone">Phone · মোবাইল *</label>
                     <div class="relative">
-                        <input id="coPhone" required pattern="01[0-9]{9}" class="input pe-10" placeholder="01XXXXXXXXX — or tap 🎤 & speak">
+                        <input id="coPhone" name="phone" value="{{ old('phone', auth()->user()?->phone) }}" required pattern="01[0-9]{9}" class="input pe-10" placeholder="01XXXXXXXXX — or tap 🎤 & speak">
                         <span class="absolute end-1 top-1/2 -translate-y-1/2"><x-shop.voice-mic for="coPhone" /></span>
                     </div>
                 </div>
@@ -31,34 +38,34 @@
             <div class="mt-3">
                 <label class="label" for="coAddr">Full address · ঠিকানা *</label>
                 <div class="relative">
-                    <textarea id="coAddr" required rows="2" class="input pe-10" placeholder="House, road, area... — or tap 🎤 & speak"></textarea>
+                    <textarea id="coAddr" name="address" required rows="2" class="input pe-10" placeholder="House, road, area... — or tap 🎤 & speak">{{ old('address') }}</textarea>
                     <span class="absolute end-1 top-2"><x-shop.voice-mic for="coAddr" mode="append" /></span>
                 </div>
             </div>
             <div class="mt-3 grid gap-3 sm:grid-cols-2">
                 <div><label class="label" for="district">District · জেলা *</label>
-                    <select id="district" x-model="district" required class="input">
+                    <select id="district" name="district" x-model="district" required class="input">
                         <option value="">Select district</option>
                         @foreach ($zones as $z)<option value="{{ $z['district'] }}">{{ $z['district'] }}</option>@endforeach
                     </select></div>
                 <div><label class="label" for="thana">Thana / Area · থানা *</label>
-                    <select id="thana" x-model="thana" required class="input"><option value="">Select thana</option><template x-for="t in thanas" :key="t"><option x-text="t"></option></template></select></div>
+                    <select id="thana" name="thana" x-model="thana" required class="input"><option value="">Select thana</option><template x-for="t in thanas" :key="t"><option x-text="t"></option></template></select></div>
             </div>
         </div>
         <div>
             <b class="text-sm">Delivery Method · ডেলিভারি মাধ্যম</b>
             <div class="mt-2 grid gap-2 sm:grid-cols-2">
-                <label class="flex cursor-pointer items-center gap-2 rounded-md border p-3 text-xs" :class="method === 'inside' ? 'border-brand bg-brand/5' : 'border-slate-200'"><input type="radio" x-model="method" value="inside" class="accent-[#c8102e]"> Inside Dhaka · ঢাকার ভিতরে <b x-text="'৳' + chargeInside()"></b></label>
-                <label class="flex cursor-pointer items-center gap-2 rounded-md border p-3 text-xs" :class="method === 'outside' ? 'border-brand bg-brand/5' : 'border-slate-200'"><input type="radio" x-model="method" value="outside" class="accent-[#c8102e]"> Outside Dhaka · ঢাকার বাইরে <b x-text="'৳' + chargeOutside()"></b></label>
+                <label class="flex cursor-pointer items-center gap-2 rounded-md border p-3 text-xs" :class="method === 'inside' ? 'border-brand bg-brand/5' : 'border-slate-200'"><input type="radio" name="delivery_method" x-model="method" value="inside" class="accent-[#c8102e]"> Inside Dhaka · ঢাকার ভিতরে <b x-text="'৳' + chargeInside()"></b></label>
+                <label class="flex cursor-pointer items-center gap-2 rounded-md border p-3 text-xs" :class="method === 'outside' ? 'border-brand bg-brand/5' : 'border-slate-200'"><input type="radio" name="delivery_method" x-model="method" value="outside" class="accent-[#c8102e]"> Outside Dhaka · ঢাকার বাইরে <b x-text="'৳' + chargeOutside()"></b></label>
             </div>
         </div>
         <div>
             <b class="text-sm">Payment · পেমেন্ট</b>
             <div class="mt-2 grid gap-2 sm:grid-cols-2 text-xs">
-                <label class="flex cursor-pointer items-center gap-2 rounded-md border p-3" :class="pay === 'cod' ? 'border-brand bg-brand/5' : 'border-slate-200'"><input type="radio" x-model="pay" value="cod" class="accent-[#c8102e]"> 💵 COD · ক্যাশ অন ডেলিভারি</label>
-                <label class="flex cursor-pointer items-center gap-2 rounded-md border p-3" :class="pay === 'bkash' ? 'border-brand bg-brand/5' : 'border-slate-200'"><input type="radio" x-model="pay" value="bkash" class="accent-[#c8102e]"> 📱 bKash</label>
-                <label class="flex cursor-pointer items-center gap-2 rounded-md border p-3" :class="pay === 'nagad' ? 'border-brand bg-brand/5' : 'border-slate-200'"><input type="radio" x-model="pay" value="nagad" class="accent-[#c8102e]"> 📱 Nagad</label>
-                <label class="flex cursor-pointer items-center gap-2 rounded-md border p-3" :class="pay === 'card' ? 'border-brand bg-brand/5' : 'border-slate-200'"><input type="radio" x-model="pay" value="card" class="accent-[#c8102e]"> 💳 Card · কার্ড</label>
+                <label class="flex cursor-pointer items-center gap-2 rounded-md border p-3" :class="pay === 'cod' ? 'border-brand bg-brand/5' : 'border-slate-200'"><input type="radio" name="payment_method" x-model="pay" value="cod" class="accent-[#c8102e]"> 💵 COD · ক্যাশ অন ডেলিভারি</label>
+                <label class="flex cursor-pointer items-center gap-2 rounded-md border p-3" :class="pay === 'bkash' ? 'border-brand bg-brand/5' : 'border-slate-200'"><input type="radio" name="payment_method" x-model="pay" value="bkash" class="accent-[#c8102e]"> 📱 bKash</label>
+                <label class="flex cursor-pointer items-center gap-2 rounded-md border p-3" :class="pay === 'nagad' ? 'border-brand bg-brand/5' : 'border-slate-200'"><input type="radio" name="payment_method" x-model="pay" value="nagad" class="accent-[#c8102e]"> 📱 Nagad</label>
+                <label class="flex cursor-pointer items-center gap-2 rounded-md border p-3" :class="pay === 'card' ? 'border-brand bg-brand/5' : 'border-slate-200'"><input type="radio" name="payment_method" x-model="pay" value="card" class="accent-[#c8102e]"> 💳 Card · কার্ড</label>
             </div>
             <div x-show="pay === 'cod'" class="mt-2 rounded-md bg-emerald-50 p-3 text-[11px] text-emerald-700">পণ্য হাতে পেয়ে মূল্য পরিশোধ করুন। ডেলিভারি চার্জ সহ মোট টাকা প্রস্তুত রাখুন।</div>
             <div x-show="pay === 'bkash'" x-cloak class="mt-2 rounded-md bg-pink-50 p-3 text-[11px]">বিকাশে পেমেন্ট: <b>017XXXXXXX (Send Money)</b> — TrxID অর্ডার নোটে লিখুন। Demo only.</div>
@@ -68,7 +75,7 @@
         <div>
             <label class="label" for="notes">Order notes (optional)</label>
             <div class="relative">
-                <textarea id="notes" rows="2" class="input pe-10" placeholder="e.g. Call before delivery... — or tap 🎤 & speak"></textarea>
+                <textarea id="notes" name="notes" rows="2" class="input pe-10" placeholder="e.g. Call before delivery... — or tap 🎤 & speak">{{ old('notes') }}</textarea>
                 <span class="absolute end-1 top-2"><x-shop.voice-mic for="notes" mode="append" /></span>
             </div>
         </div>
@@ -82,7 +89,7 @@
         <div id="coItems" class="max-h-64 space-y-2 overflow-y-auto text-xs"></div>
         <div class="flex gap-2">
             <div class="relative min-w-0 flex-1">
-                <input id="coCoupon" placeholder="Promo code — type or tap 🎤" class="input pe-10 !py-2 text-xs" aria-label="Promo code">
+                <input id="coCoupon" name="coupon_code" placeholder="Promo code — type or tap 🎤" class="input pe-10 !py-2 text-xs" aria-label="Promo code">
                 <span class="absolute end-1 top-1/2 -translate-y-1/2"><x-shop.voice-mic for="coCoupon" title="Voice promo code" /></span>
             </div>
             <button type="button" id="coApply" class="btn-outline shrink-0 px-3 py-2 text-xs">Apply</button>
@@ -139,6 +146,17 @@ function checkoutForm() {
     }
     document.addEventListener('chinabay:sync', paint);
     document.addEventListener('change', () => setTimeout(paint, 0));
+    document.getElementById('coForm')?.addEventListener('submit', (e) => {
+        const cart = window.ChinaBay?.cart || {};
+        const items = Object.keys(cart).filter((id) => window.CB_PRODUCTS[id] && cart[id] > 0)
+            .map((id) => ({ id: Number(id), qty: cart[id] }));
+        if (!items.length) {
+            e.preventDefault();
+            window.cbHelpers?.toast('Your cart is empty.');
+            return;
+        }
+        document.getElementById('coItemsInput').value = JSON.stringify(items);
+    });
     document.getElementById('coApply')?.addEventListener('click', () => {
         const v = document.getElementById('coCoupon').value.trim().toUpperCase();
         const ok = ['CHINABAY10', 'FLASH50'].includes(v);
