@@ -6,8 +6,16 @@
     $products = \App\Support\Catalog::products();
     usort($products, fn($a,$b) => $a['stock'] <=> $b['stock']);
     $low = array_slice($products, 0, 5);
+    $lowCount = count(array_filter($products, fn($p) => $p['stock'] < 15));
     usort($products, fn($a,$b) => $b['reviews'] <=> $a['reviews']);
     $best = array_slice($products, 0, 4);
+    try {
+        $productCount = \App\Models\Product::count();
+        $customerCount = \App\Models\User::count();
+    } catch (\Throwable) {
+        $productCount = count($products);
+        $customerCount = 0;
+    }
     $bars = [40,65,52,80,58,92,70];
     $days = ['Sat','Sun','Mon','Tue','Wed','Thu','Today'];
     $orders = [
@@ -20,9 +28,9 @@
     ];
 @endphp
 <div class="grid grid-cols-2 gap-3 xl:grid-cols-4">
-    @foreach ([['Today sales','৳48,200','+12% today','bg-brand'],['Orders','36','8 pending','bg-navy'],['Revenue (month)','৳6,42,500','+18% MoM','bg-emerald-600'],['Low stock','5','reorder now','bg-amber-500']] as [$l,$v,$s,$c])
+    @foreach ([['Products',number_format($productCount),count($products).' in catalogue','bg-navy','🏷'],['Low stock',(string) $lowCount,'reorder now','bg-amber-500','⚠'],['Customers',number_format($customerCount),'registered','bg-emerald-600','👥'],['Today sales','৳48,200 · sample','+12% today','bg-brand','৳']] as [$l,$v,$s,$c,$i])
     <div class="card flex items-center gap-3">
-        <span class="grid size-11 shrink-0 place-items-center rounded-lg {{ $c }} text-lg text-white">{{ $loop->index === 0 ? '৳' : ['🧾','💰','⚠'][$loop->index-1] }}</span>
+        <span class="grid size-11 shrink-0 place-items-center rounded-lg {{ $c }} text-lg text-white">{{ $i }}</span>
         <div><p class="text-[11px] text-slate-500">{{ $l }}</p><p class="text-xl font-extrabold">{{ $v }}</p><p class="text-[11px] font-semibold text-emerald-600">{{ $s }}</p></div>
     </div>
     @endforeach
@@ -30,7 +38,7 @@
 
 <div class="mt-4 grid gap-4 lg:grid-cols-3">
     <div class="card lg:col-span-2">
-        <div class="mb-2 flex items-center justify-between"><h3 class="font-bold">Sales — last 7 days</h3><span class="text-xs text-slate-500">৳ in thousands</span></div>
+        <div class="mb-2 flex items-center justify-between"><h3 class="font-bold">Sales — last 7 days</h3><span class="text-xs text-slate-500">sample data · live once orders land</span></div>
         <div class="flex h-40 items-end gap-2">
             @foreach ($bars as $i => $h)
             <div class="flex flex-1 flex-col items-center gap-1">
@@ -55,6 +63,7 @@
 <div class="mt-4 grid gap-4 lg:grid-cols-3">
     <div class="card overflow-x-auto lg:col-span-2">
         <div class="mb-2 flex items-center justify-between"><h3 class="font-bold">Today's / pending orders</h3><a href="/admin/orders" class="text-xs font-bold text-brand">View all →</a></div>
+        <p class="mb-1 text-[11px] text-slate-400">Sample preview — live order feed arrives with the order engine.</p>
         <table class="w-full min-w-[560px] text-left text-sm">
             <thead class="text-xs text-slate-500"><tr><th class="py-2">Order</th><th>Customer</th><th>Total</th><th>Status</th></tr></thead>
             <tbody>

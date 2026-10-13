@@ -20,6 +20,7 @@ class RolesPermissionsSeeder extends Seeder
         return [
             'dashboard' => ['dashboard.view'],
             'catalog' => ['products.view', 'products.manage', 'categories.manage', 'stock.manage'],
+            'pos' => ['pos.view', 'pos.sell'],
             'orders' => ['orders.view', 'orders.manage', 'returns.manage', 'reviews.moderate'],
             'customers' => ['customers.view', 'customers.manage'],
             'marketing' => ['campaigns.manage', 'coupons.manage', 'flash-sales.manage'],
@@ -55,13 +56,14 @@ class RolesPermissionsSeeder extends Seeder
                 'dashboard.view', 'products.view', 'products.manage', 'categories.manage',
                 'stock.manage', 'orders.view', 'orders.manage', 'returns.manage',
                 'reviews.moderate', 'customers.view', 'campaigns.manage', 'coupons.manage',
-                'flash-sales.manage', 'activity.view',
+                'flash-sales.manage', 'activity.view', 'pos.view', 'pos.sell',
             ]);
 
         Role::firstOrCreate(['name' => 'support', 'guard_name' => 'web'])
             ->syncPermissions([
                 'dashboard.view', 'orders.view', 'returns.manage',
                 'reviews.moderate', 'customers.view', 'activity.view',
+                'pos.view', 'pos.sell',
             ]);
 
         // Storefront customers — no admin permissions.

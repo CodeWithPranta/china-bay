@@ -70,6 +70,9 @@ Route::prefix('admin')->middleware('auth')->group(function () {
     Route::view('/orders', 'pages.admin.orders')->middleware('permission:orders.view');
     Route::view('/orders/{id}', 'pages.admin.order-detail')->middleware('permission:orders.view');
     Route::view('/products', 'pages.admin.products')->middleware('permission:products.view');
+    Route::view('/pos', 'pages.admin.pos')->middleware('permission:pos.view');
+    Route::view('/categories', 'pages.admin.categories')->middleware('permission:categories.manage');
+    Route::view('/brands', 'pages.admin.brands')->middleware('permission:categories.manage');
     Route::view('/stock', 'pages.admin.stock')->middleware('permission:stock.manage');
     Route::view('/customers', 'pages.admin.customers')->middleware('permission:customers.view');
     Route::view('/coupons', 'pages.admin.coupons')->middleware('permission:coupons.manage');

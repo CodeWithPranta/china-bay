@@ -3,6 +3,9 @@
         ['Dashboard', '/admin', '◧'],
         ['Orders', '/admin/orders', '📦'],
         ['Products', '/admin/products', '🏷'],
+        ['POS', '/admin/pos', '🧾', 'pos.view'],
+        ['Categories', '/admin/categories', '🗂', 'categories.manage'],
+        ['Brands', '/admin/brands', '©', 'categories.manage'],
         ['Stock / Inventory', '/admin/stock', '📊'],
         ['Customers', '/admin/customers', '👥'],
         ['Coupons & Campaigns', '/admin/coupons', '🎟'],
@@ -20,9 +23,12 @@
         <p class="mt-1 text-[11px] text-slate-400">Sales · Stock · Orders</p>
     </div>
     <nav class="space-y-1 px-3 pb-6 text-sm">
-        @foreach ($menu as [$t, $h, $i])
-            <a href="{{ $h }}" class="flex items-center gap-3 rounded-lg px-3 py-2.5 font-medium {{ request()->is(ltrim($h, '/').'*') ? 'bg-brand text-white' : 'text-slate-300 hover:bg-white/10 hover:text-white' }}">
-                <span>{{ $i }}</span> {{ $t }}
+        @foreach ($menu as $item)
+            @if (isset($item[3]) && ! auth()->user()?->can($item[3]))
+                @continue
+            @endif
+            <a href="{{ $item[1] }}" class="flex items-center gap-3 rounded-lg px-3 py-2.5 font-medium {{ request()->is(ltrim($item[1], '/').'*') ? 'bg-brand text-white' : 'text-slate-300 hover:bg-white/10 hover:text-white' }}">
+                <span>{{ $item[2] }}</span> {{ $item[0] }}
             </a>
         @endforeach
         <div class="mt-4 rounded-lg bg-white/5 p-3 text-[11px] text-slate-300">

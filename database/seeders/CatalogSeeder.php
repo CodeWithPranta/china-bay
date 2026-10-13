@@ -3,8 +3,10 @@
 namespace Database\Seeders;
 
 use App\Models\Category;
+use App\Models\CategoryTranslation;
 use App\Models\Product;
 use App\Models\ProductMedia;
+use App\Models\ProductTranslation;
 use App\Support\ShopDemo;
 use Illuminate\Database\Seeder;
 
@@ -29,6 +31,15 @@ class CatalogSeeder extends Seeder
                 ]
             );
             $catIds[$c['slug']] = $cat->id;
+
+            CategoryTranslation::updateOrCreate(
+                ['category_id' => $cat->id, 'locale' => 'bn'],
+                ['name' => $c['bn']]
+            );
+            CategoryTranslation::updateOrCreate(
+                ['category_id' => $cat->id, 'locale' => 'en'],
+                ['name' => $c['en']]
+            );
         }
 
         $featured = array_slice(array_column(ShopDemo::products(), 'id'), 0, 6);
@@ -59,6 +70,15 @@ class CatalogSeeder extends Seeder
                     'url' => $p['image'],
                     'is_primary' => true,
                 ]
+            );
+
+            ProductTranslation::updateOrCreate(
+                ['product_id' => $product->id, 'locale' => 'bn'],
+                ['name' => $p['name'], 'subtitle' => $p['sub']]
+            );
+            ProductTranslation::updateOrCreate(
+                ['product_id' => $product->id, 'locale' => 'en'],
+                ['name' => $p['name'], 'subtitle' => $p['sub']]
             );
         }
     }

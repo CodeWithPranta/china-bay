@@ -37,6 +37,41 @@ class Category extends Model
         return $this->hasMany(Product::class);
     }
 
+    /** @return HasMany<CategoryTranslation, $this> */
+    public function translations(): HasMany
+    {
+        return $this->hasMany(CategoryTranslation::class);
+    }
+
+    public function translation(?string $locale = null): ?CategoryTranslation
+    {
+        $locale ??= app()->getLocale();
+        $loaded = $this->relationLoaded('translations')
+            ? $this->translations
+            : $this->translations()->get();
+
+        return $loaded->firstWhere('locale', $locale)
+            ?? $loaded->firstWhere('locale', SiteLocale::defaultCode());
+    }
+
+    /**
+     * Name in the requested locale with fallback to the default
+     * locale and finally the legacy name_en/name_bn columns.
+     */
+    public function localizedName(?string $locale = null): string
+    {
+        $locale ??= app()->getLocale();
+
+        if ($this->translation($locale)?->name) {
+            return $this->translation($locale)->name;
+        }
+
+        return match ($locale) {
+            'bn' => $this->name_bn ?: $this->name_en,
+            default => $this->name_en ?: $this->name_bn,
+        };
+    }
+
     /** @param Builder<$this> $query */
     public function scopeActive(Builder $query): Builder
     {
