@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>@yield('title', 'ChinaBay – Quality Meets Connection')</title>
     <meta name="description" content="@yield('meta', 'China imported products, gadgets, home appliances and lifestyle — cash on delivery across Bangladesh.')">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <link rel="icon" href="{{ asset('favicon.ico') }}" sizes="16x16 32x32 48x48">
     <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -43,6 +44,9 @@
 
 <x-shop.drawers />
 <x-shop.ai-search />
+@auth
+<script>window.CB_USER = @json(auth()->user()->only('name'));</script>
+@endauth
 <div id="toast" class="pointer-events-none fixed bottom-5 left-1/2 z-[60] -translate-x-1/2 translate-y-4 rounded-full bg-ink px-5 py-2.5 text-sm text-white opacity-0 shadow-lg transition" role="status"></div>
 
 @stack('scripts')

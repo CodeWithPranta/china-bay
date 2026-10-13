@@ -1,6 +1,6 @@
-{{-- Conversational AI search modal. Opens when the header search is in AI mode.
-     Client-side assistant over window.CB_PRODUCTS today; swap answer() for a
-     backend endpoint (ai_generations/chatbot_messages) when AI providers land. --}}
+{{-- Conversational AI concierge. Backend-first: POSTs to /api/ai/chat
+     (ShopConcierge agent over OpenRouter with live catalogue tools);
+     falls back to the client-side recommend() when offline. --}}
 <div x-data="cbAiAssistant()" @ai-search-open.window="openWith($event.detail?.q || '')" @keydown.escape.window="close()">
     <div x-show="open" x-cloak x-transition.opacity.duration.200ms @click="close()" class="fixed inset-0 z-[70] bg-black/50" aria-hidden="true"></div>
 
@@ -71,6 +71,25 @@ function cbAiAssistant() {
         }
     }
 
+    function rich(text) {
+        let h = esc(text);
+        h = h.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+|\/\S+?)\)/g, (m, label, url) => {
+            let href = url.replace(/&amp;/g, '&');
+            const self = href.match(/^https?:\/\/(?:www\.)?chinabaybd\.com(\/.*)?$/i);
+            if (self) { href = self[1] || '/'; }
+            return `<a class="font-bold text-brand underline" href="${href}">${label}</a>`;
+        });
+        h = h.replace(/https?:\/\/(?:www\.)?chinabaybd\.com(\/[^\s<]*)?/gi, (m, path) => {
+            const href = path || '/';
+            return `<a class="font-bold text-brand underline" href="${href}">${href}</a>`;
+        });
+        h = h.replace(/\n/g, '<br>');
+        h = h.replace(/(^|[\s(])(\/(?:contact|shop|track-order|flash-sale|shipping|returns|about|cart|checkout|account(?:\/\S*)?))/g, '$1<a class="font-bold text-brand underline" href="$2">$2</a>');
+        h = h.replace(/(\+880\d{9,11})/g, '<a class="font-bold text-brand underline" href="tel:$1">$1</a>');
+        h = h.replace(/([\w.+-]+@[\w-]+\.[\w.]+)/g, '<a class="font-bold text-brand underline" href="mailto:$1">$1</a>');
+        return h;
+    }
+
     function card(p) {
         const thumb = window.cbHelpers?.cbImg(p, 'size-11') ?? `<span class="grid size-11 shrink-0 place-items-center rounded-lg bg-white text-2xl">${p.emoji}</span>`;
         return `<div class="mt-2 flex items-center gap-2.5 rounded-xl border border-slate-100 bg-slate-50/60 p-2 text-start">`
@@ -117,13 +136,15 @@ function cbAiAssistant() {
         input: '',
         greeted: false,
         messages: [],
-        chips: ['Under \u09F3 2000', 'Gift for kids', 'Flash sale', 'Track my order'],
+        chips: ['T-shirt in ৳1000', 'Gift for kids', 'Any discount?', 'Talk to human'],
         openWith(q) {
             this.open = true;
             document.body.classList.add('overflow-hidden');
             if (!this.greeted) {
                 this.greeted = true;
-                this.messages.push({ me: false, html: `Assalamu Alaikum! I am <b>Bay AI</b> \u2728 — tell me what you are looking for (product, budget, gift…) and I will pick from our China-imported collection.` });
+                const who = window.CB_USER?.name ? ' ' + String(window.CB_USER.name).trim().split(/\s+/)[0] : '';
+                const greet = `Assalamu Alaikum${who}! I am Bay AI ✨ — tell me what you are looking for (product, budget, gift…) and I will pick from our China-imported collection.`;
+                this.messages.push({ me: false, html: esc(greet), text: greet });
             }
             if (q && q.trim()) {
                 this.ask(q.trim());
@@ -147,21 +168,55 @@ function cbAiAssistant() {
             this.think(q);
         },
         pushUser(q) {
-            this.messages.push({ me: true, html: esc(q) });
+            this.messages.push({ me: true, html: esc(q), text: q });
             this.scroll();
         },
         think(q) {
             if (/track.*order|order.*track|order.*status|kothay|kobe/i.test(q)) {
-                this.messages.push({ me: false, html: `You can track any order here: <a class="font-bold text-brand underline" href="/track-order">Track Order</a> — just enter your order ID or phone number.` });
+                const text = 'You can track any order at /track-order — just enter your order ID or phone number.';
+                this.messages.push({ me: false, html: `You can track any order here: <a class="font-bold text-brand underline" href="/track-order">Track Order</a> — just enter your order ID or phone number.`, text });
                 this.scroll();
                 return;
             }
+            this.backend(q);
+        },
+        pastTurns() {
+            return this.messages.filter((m) => m.text).slice(-12).map((m) => ({
+                role: m.me ? 'user' : 'assistant',
+                content: String(m.text).slice(0, 1000),
+            }));
+        },
+        async backend(q) {
             this.busy = true;
             this.scroll();
+            try {
+                const token = document.querySelector('meta[name="csrf-token"]')?.content || '';
+                const res = await fetch('/api/ai/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': token },
+                    body: JSON.stringify({ message: q, history: this.pastTurns() }),
+                });
+                if (!res.ok) { throw new Error('chat ' + res.status); }
+                const data = await res.json();
+                this.busy = false;
+                const reply = String(data.reply || 'Sorry, I missed that — please try again.');
+                const cards = (data.products || []).map(card).join('');
+                const names = (data.products || []).map((p) => `\n- ${p.name} (${tk(p.price)})`).join('');
+                this.messages.push({ me: false, html: rich(reply) + cards, text: reply + names });
+            } catch {
+                this.local(q);
+                return;
+            }
+            this.scroll();
+            window.ChinaBay?.sync?.();
+            this.$nextTick(() => this.$refs.box?.focus());
+        },
+        local(q) {
             setTimeout(() => {
                 const r = recommend(q);
                 this.busy = false;
-                this.messages.push({ me: false, html: r.html });
+                const plain = r.html.replace(/<[^>]+>/g, '');
+                this.messages.push({ me: false, html: r.html, text: plain });
                 this.scroll();
                 window.ChinaBay?.sync?.();
                 this.$nextTick(() => this.$refs.box?.focus());

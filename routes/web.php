@@ -1,10 +1,14 @@
 <?php
 
+use App\Http\Controllers\AiChatController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\LocaleController;
 use App\Support\Catalog;
 use Illuminate\Support\Facades\Route;
+
+// Bay AI concierge (guests + logged-in shoppers; throttled)
+Route::post('/api/ai/chat', AiChatController::class)->name('ai.chat')->middleware('throttle:30,1');
 
 // Locale switcher (session based, supports LTR + RTL)
 Route::get('/locale/{locale}', LocaleController::class)->name('locale.switch');
