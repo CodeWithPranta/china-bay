@@ -186,6 +186,76 @@ function voiceLang() {
     return 'en-US';
 }
 
+// --- Phone/voice normalization -------------------------------------------
+// Speech recognition returns phone digits with spaces ("0 1 7 1 2 ..."),
+// dashes, or localized digits / number words. Collapse to 01XXXXXXXXX so
+// the checkout `pattern="01[0-9]{9}"` check passes after voice input.
+function normalizeDigits(text) {
+    const map = {
+        '০': '0', '১': '1', '২': '2', '৩': '3', '৪': '4', '৫': '5', '৬': '6', '৭': '7', '৮': '8', '৯': '9',
+        '٠': '0', '١': '1', '٢': '2', '٣': '3', '٤': '4', '٥': '5', '٦': '6', '٧': '7', '٨': '8', '٩': '9',
+        '۰': '0', '۱': '1', '۲': '2', '۳': '3', '۴': '4', '۵': '5', '۶': '6', '۷': '7', '۸': '8', '۹': '9',
+    };
+    return String(text ?? '').replace(/[০-৯٠-٩۰-۹]/g, (d) => map[d] ?? d);
+}
+
+function phoneFromSpeech(text) {
+    let s = normalizeDigits(String(text ?? '').toLowerCase());
+    const words = [
+        [/zero/g, '0'], [/\boh\b/g, '0'],
+        [/\bশূন্য\b/g, '0'],
+        [/\bone\b/g, '1'], [/\bএক\b/g, '1'],
+        [/\btwo\b/g, '2'], [/\bto\b/g, '2'], [/\btoo\b/g, '2'], [/\bদুই\b/g, '2'],
+        [/\bthree\b/g, '3'], [/\bতিন\b/g, '3'],
+        [/\bfour\b/g, '4'], [/\bfor\b/g, '4'], [/\bচার\b/g, '4'],
+        [/\bfive\b/g, '5'], [/\bপাঁচ\b/g, '5'],
+        [/\bsix\b/g, '6'], [/\bছয়\b|\bছয়\b/g, '6'],
+        [/\bseven\b/g, '7'], [/\bসাত\b/g, '7'],
+        [/\beight\b/g, '8'], [/\bআট\b/g, '8'],
+        [/\bnine\b/g, '9'], [/\bনয়\b|\bনয়\b/g, '9'],
+    ];
+    for (const [re, d] of words) {
+        s = s.replace(re, d);
+    }
+    return s.replace(/\D+/g, '');
+}
+
+function isPhoneField(input) {
+    if (!input) {
+        return false;
+    }
+    return input.id === 'coPhone' || input.name === 'phone' || input.type === 'tel' || input.inputMode === 'tel' || input.getAttribute('inputmode') === 'tel';
+}
+
+function normalizePhoneField(input) {
+    if (!input || !isPhoneField(input)) {
+        return;
+    }
+    const digits = phoneFromSpeech(input.value).slice(0, 11);
+    if (digits !== input.value) {
+        input.value = digits;
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+        input.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+}
+
+// Strip spaces from a dictated phone number as the user types/pastes too,
+// so gaps never survive until submit even if recognition already ended.
+document.addEventListener('input', (e) => {
+    if (e.target instanceof HTMLInputElement && isPhoneField(e.target)) {
+        const cur = e.target.selectionStart;
+        const clean = phoneFromSpeech(e.target.value).slice(0, 11);
+        if (clean !== e.target.value) {
+            e.target.value = clean;
+            try {
+                e.target.setSelectionRange(cur, cur);
+            } catch {
+                /* ignore */
+            }
+        }
+    }
+});
+
 const SpeechAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
 let voiceRec = null;
 let voiceBtn = null;
@@ -241,8 +311,16 @@ function startVoice(btn) {
         for (const r of e.results) {
             text += r[0].transcript;
         }
-        input.value = append && base ? base + ' ' + text.trim() : text;
+        if (isPhoneField(input)) {
+            // Collapse "0 1 7 ..." / "zero one seven ..." to "017...".
+            input.value = phoneFromSpeech(append && base ? base + ' ' + text : text).slice(0, 11);
+        } else if (input.id === 'coCoupon') {
+            input.value = normalizeDigits(text).replace(/\s+/g, '').toUpperCase();
+        } else {
+            input.value = append && base ? base + ' ' + text.trim() : text;
+        }
         input.dispatchEvent(new Event('input', { bubbles: true }));
+        input.dispatchEvent(new Event('change', { bubbles: true }));
     };
     rec.onend = () => stopVoice();
     rec.onerror = (e) => {
@@ -283,5 +361,5 @@ function cbImg(p, cls) {
 }
 
 // Expose for page-level scripts (home slider, product gallery, checkout calc).
-window.cbHelpers = { $, $$, tk, toast, panel, closeAll, openDrawer, bump, voiceLang, setVoiceLang, cbImg };
+window.cbHelpers = { $, $$, tk, toast, panel, closeAll, openDrawer, bump, voiceLang, setVoiceLang, cbImg, phoneFromSpeech, normalizePhoneField, isPhoneField };
 window.addEventListener('DOMContentLoaded', () => window.ChinaBay.sync());

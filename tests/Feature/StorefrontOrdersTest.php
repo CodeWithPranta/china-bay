@@ -83,6 +83,34 @@ test('checkout validates phone and stock', function () {
     expect($product->fresh()->stock_qty)->toBe(1);
 });
 
+test('checkout accepts form-encoded JSON items and voice-spaced phone', function () {
+    $product = seedOrderProduct(stock: 10, price: 1000);
+
+    // Browsers submit items as a JSON string via a hidden input, and voice
+    // dictation inserts gaps between digits. Both must normalize server-side.
+    $payload = checkoutPayload($product, [
+        'phone' => '01 711-222 333',
+        'items' => json_encode([['id' => $product->id, 'qty' => 2]]),
+    ]);
+
+    $response = $this->post(route('checkout.store'), $payload);
+
+    $order = Order::first();
+    expect($order)->not->toBeNull();
+    expect($order->phone)->toBe('01711222333');
+    $response->assertRedirect(route('order.success', ['code' => $order->code]));
+});
+
+test('checkout normalizes Bengali-digit phone numbers', function () {
+    $product = seedOrderProduct(stock: 10, price: 1000);
+
+    $payload = checkoutPayload($product, ['phone' => '০১৭১১২২২৩৩৩']);
+
+    $this->post(route('checkout.store'), $payload);
+
+    expect(Order::first()?->phone)->toBe('01711222333');
+});
+
 test('success page shows the placed order', function () {
     $product = seedOrderProduct();
     $this->post(route('checkout.store'), checkoutPayload($product));

@@ -30,9 +30,10 @@
                 <div>
                     <label class="label" for="coPhone">Phone · মোবাইল *</label>
                     <div class="relative">
-                        <input id="coPhone" name="phone" value="{{ old('phone', auth()->user()?->phone) }}" required pattern="01[0-9]{9}" class="input pe-10" placeholder="01XXXXXXXXX — or tap 🎤 & speak">
+                        <input id="coPhone" name="phone" type="tel" inputmode="tel" autocomplete="tel" maxlength="11" value="{{ old('phone', auth()->user()?->phone) }}" required pattern="01[0-9]{9}" title="11-digit mobile number starting with 01, e.g. 01711222333" class="input pe-10" placeholder="01XXXXXXXXX — or tap 🎤 & speak">
                         <span class="absolute end-1 top-1/2 -translate-y-1/2"><x-shop.voice-mic for="coPhone" /></span>
                     </div>
+                    <p class="mt-1 text-[11px] text-slate-500">11 digits, e.g. 01711222333 — spaces are removed automatically.</p>
                 </div>
             </div>
             <div class="mt-3">
@@ -147,6 +148,15 @@ function checkoutForm() {
     document.addEventListener('chinabay:sync', paint);
     document.addEventListener('change', () => setTimeout(paint, 0));
     document.getElementById('coForm')?.addEventListener('submit', (e) => {
+        // Normalize voice-dictated phone ("0 1 7 ..." -> "017...") just before
+        // native pattern validation runs, so gaps never block submit.
+        const phone = document.getElementById('coPhone');
+        if (phone) {
+            const clean = window.cbHelpers?.phoneFromSpeech
+                ? window.cbHelpers.phoneFromSpeech(phone.value).slice(0, 11)
+                : String(phone.value ?? '').replace(/\D+/g, '').slice(0, 11);
+            phone.value = clean;
+        }
         const cart = window.ChinaBay?.cart || {};
         const items = Object.keys(cart).filter((id) => window.CB_PRODUCTS[id] && cart[id] > 0)
             .map((id) => ({ id: Number(id), qty: cart[id] }));
@@ -156,6 +166,20 @@ function checkoutForm() {
             return;
         }
         document.getElementById('coItemsInput').value = JSON.stringify(items);
+        // #coCoupon lives in the summary aside (outside <form>) so copy it
+        // into the form — otherwise coupon_code never reaches the server.
+        const form = e.target;
+        const couponSrc = document.getElementById('coCoupon');
+        if (couponSrc) {
+            let hidden = form.querySelector('input[name="coupon_code"]');
+            if (!hidden) {
+                hidden = document.createElement('input');
+                hidden.type = 'hidden';
+                hidden.name = 'coupon_code';
+                form.appendChild(hidden);
+            }
+            hidden.value = couponSrc.value.trim().toUpperCase();
+        }
     });
     document.getElementById('coApply')?.addEventListener('click', () => {
         const v = document.getElementById('coCoupon').value.trim().toUpperCase();

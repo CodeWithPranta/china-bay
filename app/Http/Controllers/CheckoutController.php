@@ -22,6 +22,21 @@ class CheckoutController extends Controller
     {
         $zones = collect(ShopDemo::deliveryZones())->mapWithKeys(fn ($z) => [$z['district'] => $z]);
 
+        // The checkout form submits `items` as a JSON string via a hidden input.
+        // Decode it back to an array before validation so `items => array` passes.
+        $rawItems = $request->input('items');
+        if (is_string($rawItems)) {
+            $decoded = json_decode(trim($rawItems), true);
+            $request->merge(['items' => is_array($decoded) ? $decoded : []]);
+        }
+
+        // Voice typing inserts spaces/dashes between digits (e.g. "01 7xx xxx xxx")
+        // and may produce Bengali/Arabic-Indic digits. Normalize to 01XXXXXXXXX.
+        $rawPhone = $request->input('phone');
+        if (is_string($rawPhone)) {
+            $request->merge(['phone' => self::normalizePhone($rawPhone)]);
+        }
+
         $data = $request->validate([
             'name' => ['required', 'string', 'max:120'],
             'phone' => ['required', 'regex:/^01[0-9]{9}$/'],
@@ -128,5 +143,27 @@ class CheckoutController extends Controller
         $order = Order::with('items')->where('code', $request->query('code'))->firstOrFail();
 
         return view('pages.order-success', ['order' => $order]);
+    }
+
+    /**
+     * Normalize a phone number dictated by voice or typed with separators.
+     *
+     * Converts Bengali (০-৯), Arabic-Indic (٠-٩) and Extended Arabic (۰-۹)
+     * digits to ASCII, then strips everything except digits.
+     */
+    public static function normalizePhone(string $phone): string
+    {
+        $map = [
+            '০' => '0', '১' => '1', '২' => '2', '৩' => '3', '৪' => '4',
+            '৫' => '5', '৬' => '6', '৭' => '7', '৮' => '8', '৯' => '9',
+            '٠' => '0', '١' => '1', '٢' => '2', '٣' => '3', '٤' => '4',
+            '٥' => '5', '٦' => '6', '٧' => '7', '٨' => '8', '٩' => '9',
+            '۰' => '0', '۱' => '1', '۲' => '2', '۳' => '3', '۴' => '4',
+            '۵' => '5', '۶' => '6', '۷' => '7', '۸' => '8', '۹' => '9',
+        ];
+
+        $phone = strtr($phone, $map);
+
+        return (string) preg_replace('/\D+/', '', $phone);
     }
 }
